@@ -1,0 +1,40 @@
+import Field from "@/components/edit/Field";
+import { IconCheck } from "./icons";
+
+/**
+ * Deliverables as filled checklist cards. Each item is a `card`-filled row so a
+ * short label never leaves an empty grid cell looking like dead space (the old
+ * two-column grid did exactly that). Using flex-wrap with `flex-1` + a min basis
+ * means the row is always fully packed — a lone final item at an odd count grows
+ * to fill its row rather than leaving a hole — so it reflows cleanly at ANY item
+ * count: single column on mobile (min basis forces one per row), two per row on
+ * desktop. The checkmark uses the validated `dark`/`onDark` pairing for
+ * guaranteed contrast across every project's palette. Items stay editable.
+ */
+export default function DeliverablesChecklist({
+  slug,
+  count,
+}: {
+  slug: string;
+  count: number;
+}) {
+  return (
+    <ul className="flex flex-wrap gap-3">
+      {Array.from({ length: count }, (_, i) => (
+        <li
+          key={i}
+          className="flex min-w-[15rem] flex-1 items-center gap-3 rounded-[12px] bg-[var(--cs-card,#FFFAF4)] px-4 py-3.5 ring-1 ring-inset ring-[var(--cs-text,#1F2A19)]/5"
+        >
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--cs-dark,#182312)] text-[var(--cs-on-dark,#FBF7F1)]">
+            <IconCheck className="h-3.5 w-3.5" />
+          </span>
+          <Field
+            id={`case.${slug}.deliverable.${i + 1}`}
+            as="span"
+            className="text-[var(--cs-text,#1F2A19)]/85"
+          />
+        </li>
+      ))}
+    </ul>
+  );
+}

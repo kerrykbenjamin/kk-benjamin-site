@@ -1,0 +1,140 @@
+# Editing Your Website — A Quick Guide
+
+Your site lets you change the words and photos yourself — no code, no separate
+app. Here's everything you need. It works the same on your phone and your computer.
+
+---
+
+## 1. Log in
+
+1. Go to your website address and add **`/edit`** to the end.
+   (For example: `yourwebsite.com/edit` — bookmark this page so it's easy to find.)
+2. Type your **password** and tap **Log in to edit**.
+
+That's it — you're taken back to your site.
+
+## 2. Turn on editing
+
+At the very bottom of the screen you'll see a small bar with an **“Edit site”**
+button. Tap it. Now the parts you can change will show a light **dashed outline**.
+
+## 3. Change some text
+
+1. Tap any text that has a dashed outline (you'll see a little ✎ pencil).
+2. A box opens — type your new words.
+3. Tap **Save**.
+
+The change shows up right away. There's a small counter (like `24/65`) telling you
+how many characters you have room for — if you go over, it just asks you to shorten
+it a little so the design still looks right.
+
+On a case study page this includes the newer bits too: each **font's name and
+role** ("Headline" / "Body") in the Typography area, and the little **caption
+line under the Results numbers** (e.g. *"\*Projections based on a 3-month
+campaign strategy"*). The specimen "Aa" images next to the font names are fixed
+pictures — they aren't edited here.
+
+## 4. Change a photo
+
+1. Tap the **“Change photo”** button on any picture.
+2. Pick a photo from your phone or computer.
+3. Wait a couple of seconds while it uploads.
+
+You don't need to worry about photo size or dimensions — the site shrinks and
+optimizes it for you automatically.
+
+**Adding a photo to an empty spot.** Some picture spots start out without a
+photo on purpose:
+
+- **The three “Campaign photo” spots** on each case study's spotlight band —
+  shown as a light dashed frame until you drop in your best campaign shots.
+- **The square photo under each step** of a case study's Process row — until
+  you add a photo, it shows a tidy tile with a little icon and the step's name
+  in your project's colors. Visitors see that tile too, and it's designed to
+  look finished, so there's no rush.
+- **The Portfolio page's gallery tiles** (the "Illustrations and Projects"
+  squares) — empty ones show a neat "Gallery photo" tile until you fill them.
+  These work exactly like the Process photos: square, auto-trimmed from the
+  middle, swap-but-not-remove. Each tile can also have a **title and a short
+  tagline** — nobody sees them on the grid (the grid is clean photos, even
+  while you're logged in); they appear **centered along the bottom of the
+  pop-up** when a visitor taps the photo to enlarge it. To change them, tap
+  **"Edit site"** — the title and tagline then show under each tile with the
+  usual pencil; tiles without a caption just show the photo, no empty box.
+
+Tap **“Add photo”** on any of these to fill it (after that it says “Change
+photo” like the rest). Two things to know about the Process photos:
+
+- **They're square.** Whatever you upload is automatically trimmed to a neat
+  square from the middle of the picture — so roughly-square photos work best,
+  and nothing ever comes out stretched or squished.
+- **You can swap, not remove.** Once a spot has a real photo you can replace it
+  with a different one any time, but there's no way to take it back to the
+  placeholder tile — so add photos when you have ones you like.
+
+## 5. Change your colors
+
+1. While editing is on, tap **“Colors”** in the bottom bar.
+2. If you're on a case study page, choose **“Site-wide”** (changes the whole
+   site) or **“This page”** (changes just that one project's page).
+3. **Easiest way — pick a look:** tap one of the color swatches. Every one is
+   pre-checked to look good, so you can't pick a bad combination by accident.
+   It saves as soon as you tap it.
+4. **Or make your own:** switch to **“Custom”**, then use the two color
+   wheels — one for the **background**, one for the **accent** (used for your
+   headings and buttons). You'll see the page change color right away so you
+   can preview it before saving.
+   - If the two colors you pick would be hard to read together, the app tells
+     you in plain language (like *"try a darker background"*) and won't let
+     you save it — so the site can never end up looking broken.
+5. Changed your mind? Tap **“Reset to default”** at the bottom of the panel to
+   go back to the original colors, any time.
+
+## 6. Reorder your case studies, value props, or gallery photos
+
+While editing is on, hover or tap any card in one of those groups and you'll
+see small controls in the corner:
+
+- **‹ › arrows** — tap to move that item one spot earlier or later. This
+  always works, on any device.
+- **⠿ handle** — press and drag to move an item exactly where you want it.
+
+The order saves automatically the moment you drop it or tap an arrow. You can
+only reorder items **within their own row of cards** — you can't drag a photo
+on top of text, resize anything, or change how many columns there are, so the
+layout can never break.
+
+## 7. When you're done
+
+1. Tap **“Done editing”** in the bottom bar (this hides the outlines).
+2. Tap **“Log out”** when you're finished for the day.
+
+Visitors to your site **never** see any of the edit buttons, outlines, or
+reorder handles — those only appear when you're logged in.
+
+### The "Get in touch" button
+
+Visitors who tap it get a **contact form in a pop-up** — they fill in their
+name, email, and message, hit send, and it lands in your email inbox (no email
+app needed on their end). The button's **label is editable** like any other
+text: turn on "Edit site" and tap it (while editing, tapping edits the words
+instead of opening the form). The form's fields themselves aren't editable —
+ask your developer if you want them changed.
+
+---
+
+### Good to know
+
+- **Your changes are live within a few seconds** for everyone who visits.
+- **Anyone can tap a photo to view it larger** — one photo at a time; close it
+  with the ×, the Esc key, or by tapping the dimmed background. This works for
+  you too while you're just browsing. The moment you tap **"Edit site"**,
+  tapping a photo opens the photo picker instead (the whole photo is the
+  button, not just the little pill), so you can't accidentally trigger an
+  upload while browsing or open the viewer while editing.
+- If something can't be saved, you'll see a little message at the top explaining
+  why (for example, text that's too long, or an empty box).
+- You can change **words, photos, colors, and the order of cards** — but not
+  the layout itself (column counts, spacing, which sections exist), so it's
+  impossible to accidentally break how the site looks.
+- Forgot your password or want to change it? Ask whoever set up the site.
