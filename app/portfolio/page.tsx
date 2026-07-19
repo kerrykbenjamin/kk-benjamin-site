@@ -22,13 +22,11 @@ export const metadata: Metadata = {
 };
 
 export default async function PortfolioPage() {
-  const [email, caseOrder, illusOrder, editor] = await Promise.all([
-    getText("global.contact.email"),
+  const [caseOrder, illusOrder, editor] = await Promise.all([
     getOrder("caseStudies", caseStudies.map((c) => c.slug)),
     getOrder("portfolioIllustrations", portfolioIllustrations.map((i) => i.id)),
     getIsEditor(),
   ]);
-  const mailto = `mailto:${email}`;
 
   const orderedStudies = applyOrder(caseStudies, caseOrder, (c) => c.slug);
   const caseItems: OrderedItem[] = orderedStudies.map((s, i) => ({
@@ -52,7 +50,9 @@ export default async function PortfolioPage() {
       return {
         id: illus.id,
         node: (
-          <Reveal key={illus.id} delay={i * 0.08}>
+          // Stagger caps at 6 tiles: uncapped, tile 16 would sit invisible for
+          // 1.2s after scrolling into view.
+          <Reveal key={illus.id} delay={Math.min(i, 5) * 0.08}>
             <div className="group">
               <ImageSlot
                 id={`portfolio.illus.${illus.n}.image`}
@@ -132,9 +132,11 @@ export default async function PortfolioPage() {
               className="mt-4 font-display text-h2 font-semibold text-forest"
             />
           </div>
-          {/* Uniform square-tile gallery: 2×2 up to lg, one row of 4 at lg+.
-              3-col md is deliberately skipped — 4 tiles in 3 columns leaves an
-              orphaned partial row. */}
+          {/* Uniform square-tile gallery, GALLERY_SLOT_COUNT tiles: 2 columns
+              up to lg, 4 at lg+. A 3-col md step is deliberately skipped —
+              16 divides evenly into 2 and 4 (8 full rows / a clean 4×4) but
+              not into 3, which would strand a single orphan tile on the last
+              row between 768px and 1024px. */}
           <OrderedGrid
             collection="portfolioIllustrations"
             items={illusItems}
@@ -151,8 +153,13 @@ export default async function PortfolioPage() {
             as="h2"
             className="mx-auto max-w-2xl font-display text-h2 font-semibold text-forest"
           />
+          {/* In-page anchor to the global <ContactCTA id="contact"> rendered
+              after <main> — visitors stay on the page instead of being handed
+              off to a mail client. Smooth scroll (and its reduced-motion
+              opt-out) comes from html{scroll-behavior} in globals.css; the
+              64px sticky-header offset from the target's own scroll-mt-16. */}
           <div className="mt-8 flex justify-center">
-            <ButtonLink href={mailto} variant="solid" arrow>
+            <ButtonLink href="#contact" variant="solid" arrow>
               Let&apos;s talk
             </ButtonLink>
           </div>

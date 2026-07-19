@@ -29,6 +29,11 @@ export default async function Home() {
           and the image keeps `priority`, so LCP is unaffected. Gradient stops
           are stronger below `sm` where the photo sits behind ALL the text. */}
       <section className="relative overflow-hidden bg-forest-deep">
+        {/* Deliberately NOT lightbox-eligible: this is a background/design
+            element, not a content image, so it gets no click-to-enlarge, no
+            zoom cursor, and no focusable trigger. `lightbox` is opt-in across
+            all image components, so omitting it is the whole mechanism — the
+            editor's change-photo flow is unaffected and still works. */}
         <div className="absolute inset-0">
           <ImageField
             id="home.hero.image"
@@ -36,7 +41,6 @@ export default async function Home() {
             priority
             sizes="100vw"
             className="object-cover"
-            lightbox="home"
           />
         </div>
         <div

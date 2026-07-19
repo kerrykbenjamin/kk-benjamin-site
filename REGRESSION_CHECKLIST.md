@@ -13,7 +13,9 @@ enough — content can exist in the DOM but be invisible (e.g. stuck at
 - [ ] Mobile <768px: hamburger (44×44) opens **full-screen opaque `forest-deep`**
       menu — zero page bleed-through, body scroll locked, closes via ×/Esc/link
 - [ ] Contact CTA block ("Let's create something amazing together." + portrait +
-      email/phone/location/LinkedIn) present and **visible** above the footer
+      email/LinkedIn/location — **no phone**, that field is unregistered) present
+      and **visible** above the footer. LinkedIn href is exactly
+      `https://www.linkedin.com/in/kerry-benjamin-8b695b2a9/`, new tab + noopener
 - [ ] **"Get in touch" opens the contact-form modal** (two-column variant:
       first/last name side-by-side ≥640px, stacked at 375px): required-field +
       email validation with plain-English messages; Sending → success replaces
@@ -46,9 +48,10 @@ enough — content can exist in the DOM but be invisible (e.g. stuck at
 - [ ] Intro: eyebrow, H1, subhead
 - [ ] Filter tabs (ALL/BRANDING/SOCIAL/STRATEGY) styled, active state works
 - [ ] Case studies grid: **even 2×2 on ≥640px** (no orphaned 4th card), 1-col mobile
-- [ ] Illustrations and Projects: **4-slot square-tile gallery** (count =
+- [ ] Illustrations and Projects: **16-slot square-tile gallery** (count =
       `GALLERY_SLOT_COUNT` in data/portfolioIllustrations.ts): uniform 1:1
-      tiles, 2×2 below `lg` / one row of 4 at `lg+`, no orphaned partial rows;
+      tiles, 2 columns below `lg` (8 full rows) / 4×4 at `lg+`, no orphaned
+      partial rows — note 16 does NOT divide by 3, so no `md:grid-cols-3` step;
       empty slots show the styled GalleryPlaceholder (site tokens, never
       broken/blank); grid tiles are BARE images — no caption text for
       visitors OR for a logged-in editor who is browsing (caption fields

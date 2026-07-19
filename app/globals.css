@@ -53,11 +53,18 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Horizontal-overflow guard (common Framer-export failure this rebuild fixes) */
+/* Horizontal-overflow guard (common Framer-export failure this rebuild fixes).
+   MUST be `clip`, not `hidden`: `overflow-x: hidden` makes the element a
+   scroll container, which silently breaks two things site-wide —
+     1. in-page "#contact" anchor links stop scrolling (the fragment algorithm
+        targets body, whose own scrollTop never moves because html scrolls), and
+     2. the header's `sticky top-0` stops sticking.
+   `clip` suppresses horizontal overflow without creating a scroll container,
+   so both keep working. */
 html,
 body {
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* In @layer base so Tailwind height/width utilities (e.g. h-10 on the logo)

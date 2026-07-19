@@ -46,12 +46,11 @@ const STEPS = ["Mood Board", "Sketches", "Logo Concepts", "Final Brand"];
 /** Every seedable slot: key, two label lines, and pixel size (slot ratio). */
 function slots() {
   const out = [];
-  // Gallery slots 1–2 carry REAL default images via the content registry (the
-  // store can't see registry defaults), so only the empty generated slots are
-  // seeded. Extend this list if GALLERY_SLOT_COUNT grows.
-  for (const n of [3, 4]) {
-    out.push({ key: `portfolio.illus.${n}.image`, l1: "TEST", l2: `Gallery ${n}`, w: 800, h: 800 });
-  }
+  // The portfolio gallery is deliberately NOT seeded. Its empty slots are
+  // meant to show the on-brand GalleryPlaceholder until real photos are
+  // uploaded, and it holds GALLERY_SLOT_COUNT (currently 16) tiles — a
+  // hardcoded slot list here went stale the moment that count changed. Case
+  // study slots below are a fixed 4-studies × (4 process + 3 spotlight) shape.
   for (const [slug, tag] of Object.entries(SLUGS)) {
     for (let n = 1; n <= 4; n++) {
       out.push({

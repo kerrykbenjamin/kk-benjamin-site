@@ -83,7 +83,9 @@ fields.push(
   t("global.contact.sub", "global", "Contact — subheading", MAX.lead, "I'm always open to discussing new projects, collaborations, or opportunities.", true),
   t("global.contact.button", "global", "Contact — button label", MAX.button, "Get in touch"),
   t("global.contact.email", "global", "Contact — email", MAX.short, site.email),
-  t("global.contact.phone", "global", "Contact — phone", MAX.short, site.phone),
+  // No phone field by design. Unregistering the key also neutralizes any value
+  // already saved in the content store — lib/content/index.ts drops overrides
+  // whose key is no longer in the registry — so it cannot reappear.
   t("global.contact.location", "global", "Contact — location", MAX.short, site.location),
   t("global.contact.linkedinUrl", "global", "Contact — LinkedIn URL", MAX.url, site.linkedin),
   t("global.contact.linkedinLabel", "global", "Contact — LinkedIn label", MAX.short, site.linkedinLabel),

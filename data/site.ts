@@ -4,9 +4,7 @@ export const site = {
   tagline: "Digital Marketer. Designer. Storyteller.",
   email: "kerrybenjamin@gmail.com",
   mailto: "mailto:kerrybenjamin@gmail.com",
-  phone: "(781) 123-4567",
-  phoneHref: "tel:+17811234567",
   location: "Boston, Massachusetts",
-  linkedin: "https://www.linkedin.com/in/kerrybenjamin",
-  linkedinLabel: "linkedin.com/in/kerrybenjamin",
+  linkedin: "https://www.linkedin.com/in/kerry-benjamin-8b695b2a9/",
+  linkedinLabel: "linkedin.com/in/kerry-benjamin",
 } as const;

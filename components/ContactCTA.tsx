@@ -25,19 +25,25 @@ function Detail({
 
 export default async function ContactCTA() {
   const editor = await getIsEditor();
-  const [email, phone, location, linkedinUrl, linkedinLabel] = await Promise.all([
+  const [email, location, linkedinUrl, linkedinLabel] = await Promise.all([
     getText("global.contact.email"),
-    getText("global.contact.phone"),
     getText("global.contact.location"),
     getText("global.contact.linkedinUrl"),
     getText("global.contact.linkedinLabel"),
   ]);
 
   const mailto = `mailto:${email}`;
-  const tel = `tel:${phone.replace(/[^0-9+]/g, "")}`;
 
   return (
-    <section id="contact" className="scroll-mt-16 bg-forest-deep text-cream">
+    // tabIndex={-1} makes this a real focus target for in-page "#contact"
+    // links (a <section> isn't focusable by default), so keyboard and screen
+    // reader users land INSIDE the section instead of tabbing on from the
+    // link they just activated. scroll-mt-16 matches the 64px sticky header.
+    <section
+      id="contact"
+      tabIndex={-1}
+      className="scroll-mt-16 bg-forest-deep text-cream focus:outline-none"
+    >
       <Container className="py-16 sm:py-24">
         <div className="grid gap-10 md:grid-cols-2 md:items-center md:gap-16">
           <Reveal>
@@ -72,22 +78,6 @@ export default async function ContactCTA() {
                     </a>
                   )}
                 </Detail>
-                <Detail label="Phone">
-                  {editor ? (
-                    <Field id="global.contact.phone" as="span" />
-                  ) : (
-                    <a href={tel} className="hover:text-blush">
-                      {phone}
-                    </a>
-                  )}
-                </Detail>
-                <Detail label="Location">
-                  {editor ? (
-                    <Field id="global.contact.location" as="span" />
-                  ) : (
-                    location
-                  )}
-                </Detail>
                 <Detail label="LinkedIn">
                   {editor ? (
                     <Field id="global.contact.linkedinLabel" as="span" />
@@ -100,6 +90,13 @@ export default async function ContactCTA() {
                     >
                       {linkedinLabel}
                     </a>
+                  )}
+                </Detail>
+                <Detail label="Location">
+                  {editor ? (
+                    <Field id="global.contact.location" as="span" />
+                  ) : (
+                    location
                   )}
                 </Detail>
               </dl>

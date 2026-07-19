@@ -107,9 +107,6 @@ export default function MobileNav({
           <a href={site.mailto} className="block hover:text-blush">
             {site.email}
           </a>
-          <a href={site.phoneHref} className="block hover:text-blush">
-            {site.phone}
-          </a>
           <span className="block">{site.location}</span>
         </div>
       </div>

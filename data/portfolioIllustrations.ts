@@ -15,7 +15,7 @@ export type PortfolioIllustration = {
  * (lib/content/registry.ts), and their reorder ids (app/api/content/order) all
  * derive from the list below, so no other change is needed.
  */
-export const GALLERY_SLOT_COUNT = 4;
+export const GALLERY_SLOT_COUNT = 16;
 
 const named: PortfolioIllustration[] = [
   {
