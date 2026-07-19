@@ -17,8 +17,15 @@ const nextConfig: NextConfig = {
   // library on Netlify (ERR_DLOPEN_FAILED: libvips-cpp.so ... no such file).
   // This explicitly tells the tracer to include sharp's whole package
   // directory (binaries included) for the one route that uses it.
+  // NOTE: sharp's native code lives in SIBLING packages under @img/ (e.g.
+  // @img/sharp-linux-x64 + @img/sharp-libvips-linux-x64), NOT inside
+  // node_modules/sharp — so tracing only ./node_modules/sharp/** bundles the
+  // JS wrapper while still missing libvips-cpp.so. Both paths are needed.
   outputFileTracingIncludes: {
-    "/api/content/image": ["./node_modules/sharp/**/*"],
+    "/api/content/image": [
+      "./node_modules/sharp/**/*",
+      "./node_modules/@img/**/*",
+    ],
   },
   images: {
     formats: ["image/avif", "image/webp"],
