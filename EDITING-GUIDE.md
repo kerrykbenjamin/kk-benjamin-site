@@ -34,6 +34,24 @@ line under the Results numbers** (e.g. *"\*Projections based on a 3-month
 campaign strategy"*). The specimen "Aa" images next to the font names are fixed
 pictures — they aren't edited here.
 
+**The long case study sections are editable too.** Everything in the Challenge,
+Objectives, Target audience (including the persona card), Brand positioning,
+Photography style, Deliverables groups, Content mix, campaign spotlight text,
+Local marketing, Customer journey, the Before/After numbers in the Sample
+performance metrics, Key takeaways, and the Skills chips — every line has the
+same dashed outline and pencil. A few small things stay fixed on purpose:
+
+- The **"projected outcomes for portfolio demonstration purposes"** notes next
+  to sample numbers can't be edited or removed — they keep the portfolio
+  honest about which figures are projections rather than achieved results.
+- The **width of the Content mix bars** comes from the percentages and can't
+  be dragged; ask your developer if the mix itself changes.
+- **Section headings** ("The challenge", "Results", and so on) are part of the
+  design, like the layout.
+
+Each project only shows the sections it has content for — if a project has no
+metrics table or persona, that section simply isn't there, and that's normal.
+
 ## 4. Change a photo
 
 1. Tap the **“Change photo”** button on any picture.

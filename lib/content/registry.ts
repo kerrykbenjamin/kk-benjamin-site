@@ -43,7 +43,7 @@ const MAX = {
   h2: 80,
   h3: 45,
   lead: 220,
-  body: 480,
+  body: 600, // multi-paragraph blocks (intro/reflection/persona) — wraps, never truncates
   tagline: 80,
   quote: 280,
   bullet: 110,
@@ -57,6 +57,11 @@ const MAX = {
   name: 60,
   caption: 120, // centered results caption — fits one/two lines at 375px
   role: 24, // font role ("Headline" / "Body")
+  item: 36, // checklist/chip items that run longer than MAX.chip ("Google Business Profile Assets")
+  pillarDesc: 180, // one-to-two sentence pillar description
+  metricLabel: 40, // metrics-table row label ("Average Monthly Website Visitors")
+  metricValue: 16, // metrics-table cell ("19,400/month")
+  stageTitle: 32, // funnel stage name ("Consideration")
 } as const;
 
 function t(
@@ -248,6 +253,128 @@ for (const cs of caseStudies) {
     ),
   );
   fields.push(t(k("reflection"), p, `${cs.title} — reflection`, MAX.body, cs.reflection, true));
+
+  // ---- Extended narrative sections (doc-sourced; all optional) --------------
+  // Each block follows the established pattern: the data array in
+  // data/caseStudies.ts fixes the count, keys are 1-based `…{n}`, and a study
+  // without the section registers no keys at all (so the section hides and
+  // nothing appears in the edit UI).
+  //
+  // NOT registered on purpose: metricsNote / resultsNote (the projected-sample
+  // honesty labels — non-editable so they can't be casually deleted),
+  // MixCategory.percent (drives the CSS bar width; must stay numeric), and
+  // funnelLabel (section eyebrow, consistent with other hardcoded labels).
+
+  /** Registers a BulletBlock's heading/intro/items/outro/quote as fields. */
+  const block = (
+    name: string,
+    label: string,
+    b?: { heading?: string; intro?: string; items: string[]; outro?: string; quote?: string },
+  ) => {
+    if (!b) return;
+    if (b.heading) fields.push(t(k(`${name}.heading`), p, `${cs.title} — ${label} heading`, MAX.h3, b.heading));
+    if (b.intro) fields.push(t(k(`${name}.intro`), p, `${cs.title} — ${label} intro`, MAX.body, b.intro, true));
+    b.items.forEach((s, i) =>
+      fields.push(t(k(`${name}.${i + 1}`), p, `${cs.title} — ${label} ${i + 1}`, MAX.bullet, s)),
+    );
+    if (b.outro) fields.push(t(k(`${name}.outro`), p, `${cs.title} — ${label} closing`, MAX.body, b.outro, true));
+    if (b.quote) fields.push(t(k(`${name}.quote`), p, `${cs.title} — ${label} quote`, MAX.quote, b.quote));
+  };
+
+  block("challenge", "challenge", cs.challenge);
+  block("objectives", "objective", cs.objectives);
+  block("local", "local marketing", cs.localMarketing);
+  block("outcomes", "outcome", cs.resultsOutcomes);
+  block("takeaways", "takeaway", cs.takeaways);
+
+  if (cs.audience) {
+    if (cs.audience.primaryIntro)
+      fields.push(t(k("audience.intro"), p, `${cs.title} — audience intro`, MAX.short, cs.audience.primaryIntro));
+    cs.audience.primary.forEach((s, i) =>
+      fields.push(t(k(`audience.${i + 1}`), p, `${cs.title} — audience ${i + 1}`, MAX.bullet, s)),
+    );
+    if (cs.audience.secondary)
+      fields.push(t(k("audience.secondary"), p, `${cs.title} — secondary audience`, MAX.body, cs.audience.secondary, true));
+  }
+  if (cs.persona) {
+    fields.push(
+      t(k("persona.name"), p, `${cs.title} — persona name`, MAX.name, cs.persona.name),
+      t(k("persona.body"), p, `${cs.title} — persona story`, MAX.body, cs.persona.body, true),
+    );
+  }
+  if (cs.positioning)
+    fields.push(t(k("positioning"), p, `${cs.title} — positioning statement`, MAX.quote, cs.positioning, true));
+  if (cs.pillarsIntro)
+    fields.push(t(k("pillars.intro"), p, `${cs.title} — pillars intro`, MAX.lead, cs.pillarsIntro));
+  (cs.pillars ?? []).forEach((pl, i) => {
+    const n = i + 1;
+    fields.push(t(k(`pillar.${n}.title`), p, `${cs.title} — pillar ${n} title`, MAX.h3, pl.title));
+    if (pl.description)
+      fields.push(t(k(`pillar.${n}.desc`), p, `${cs.title} — pillar ${n} description`, MAX.pillarDesc, pl.description, true));
+  });
+  (cs.photography ?? []).forEach((s, i) =>
+    fields.push(t(k(`photography.${i + 1}`), p, `${cs.title} — photography style ${i + 1}`, MAX.bullet, s)),
+  );
+  (cs.strategySections ?? []).forEach((sec, i) => {
+    const n = i + 1;
+    fields.push(t(k(`strat.${n}.title`), p, `${cs.title} — strategy ${n} title`, MAX.h3, sec.title));
+    if (sec.intro)
+      fields.push(t(k(`strat.${n}.intro`), p, `${cs.title} — strategy ${n} intro`, MAX.body, sec.intro, true));
+    (sec.items ?? []).forEach((s, j) =>
+      fields.push(t(k(`strat.${n}.item.${j + 1}`), p, `${cs.title} — strategy ${n} item ${j + 1}`, MAX.bullet, s)),
+    );
+    if (sec.outro)
+      fields.push(t(k(`strat.${n}.outro`), p, `${cs.title} — strategy ${n} closing`, MAX.body, sec.outro, true));
+  });
+  (cs.deliverableGroups ?? []).forEach((g, i) => {
+    const n = i + 1;
+    fields.push(t(k(`delivgroup.${n}.title`), p, `${cs.title} — deliverable group ${n} title`, MAX.h3, g.title));
+    g.items.forEach((s, j) =>
+      fields.push(t(k(`delivgroup.${n}.item.${j + 1}`), p, `${cs.title} — ${g.title} item ${j + 1}`, MAX.item, s)),
+    );
+  });
+  if (cs.contentMixIntro)
+    fields.push(t(k("mix.intro"), p, `${cs.title} — content mix intro`, MAX.body, cs.contentMixIntro, true));
+  (cs.contentMix ?? []).forEach((m, i) => {
+    const n = i + 1;
+    fields.push(t(k(`mix.${n}.label`), p, `${cs.title} — content mix ${n} label`, MAX.short, m.label));
+    m.items.forEach((s, j) =>
+      fields.push(t(k(`mix.${n}.item.${j + 1}`), p, `${cs.title} — content mix ${n} item ${j + 1}`, MAX.bullet, s)),
+    );
+  });
+  if (cs.campaignInfo) {
+    // Keys use the `featured.` prefix, NOT the retired `campaign.*` keys — a
+    // stale "case.natural-beauty.campaign.cta" override still sits in the
+    // store, and re-registering that key would silently resurrect it.
+    fields.push(t(k("featured.title"), p, `${cs.title} — campaign title`, MAX.h3, cs.campaignInfo.title));
+    if (cs.campaignInfo.description)
+      fields.push(t(k("featured.desc"), p, `${cs.title} — campaign description`, MAX.body, cs.campaignInfo.description, true));
+    (cs.campaignInfo.items ?? []).forEach((s, i) =>
+      fields.push(t(k(`featured.item.${i + 1}`), p, `${cs.title} — campaign element ${i + 1}`, MAX.bullet, s)),
+    );
+    if (cs.campaignInfo.outro)
+      fields.push(t(k("featured.outro"), p, `${cs.title} — campaign closing`, MAX.body, cs.campaignInfo.outro, true));
+  }
+  (cs.funnel ?? []).forEach((st, i) => {
+    const n = i + 1;
+    fields.push(t(k(`funnel.${n}.title`), p, `${cs.title} — funnel stage ${n}`, MAX.stageTitle, st.title));
+    st.items.forEach((s, j) =>
+      fields.push(t(k(`funnel.${n}.item.${j + 1}`), p, `${cs.title} — funnel stage ${n} item ${j + 1}`, MAX.bullet, s)),
+    );
+  });
+  (cs.metrics ?? []).forEach((r, i) => {
+    const n = i + 1;
+    fields.push(
+      t(k(`metric.${n}.label`), p, `${cs.title} — metric ${n} label`, MAX.metricLabel, r.label),
+      t(k(`metric.${n}.before`), p, `${cs.title} — metric ${n} before`, MAX.metricValue, r.before),
+      t(k(`metric.${n}.after`), p, `${cs.title} — metric ${n} after`, MAX.metricValue, r.after),
+    );
+  });
+  if (cs.resultsIntro)
+    fields.push(t(k("results.intro"), p, `${cs.title} — results intro`, MAX.body, cs.resultsIntro, true));
+  (cs.skills ?? []).forEach((s, i) =>
+    fields.push(t(k(`skill.${i + 1}`), p, `${cs.title} — skill ${i + 1}`, MAX.item, s)),
+  );
 }
 
 export const REGISTRY: FieldDef[] = fields;
