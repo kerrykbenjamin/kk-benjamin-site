@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { revalidatePath } from "next/cache";
-import sharp from "sharp";
 import { isEditorRequest } from "@/lib/auth";
 import { getField } from "@/lib/content/registry";
 import { getStore } from "@/lib/content/store";
@@ -41,6 +40,12 @@ export async function POST(req: NextRequest) {
 
   let processed: Buffer;
   try {
+    // Loaded here (not as a static top-level import) so that a failure to
+    // load sharp's native binary on the deployed platform is CAUGHT by this
+    // try/catch and reported back in the response, instead of crashing the
+    // whole route module at import time — which surfaced as an opaque,
+    // undiagnosable "Internal Server Error" with no useful message.
+    const { default: sharp } = await import("sharp");
     const input = Buffer.from(await file.arrayBuffer());
     const base = sharp(input).rotate(); // honor EXIF orientation from phone photos
     if (field.square) {
@@ -64,8 +69,15 @@ export async function POST(req: NextRequest) {
         .webp({ quality: 80 })
         .toBuffer();
     }
-  } catch {
-    return NextResponse.json({ error: "Couldn't process that image. Try another." }, { status: 400 });
+  } catch (e) {
+    // TEMPORARY: surfacing the real message while diagnosing the Netlify
+    // deploy issue — revert to the generic copy once uploads are confirmed
+    // working end-to-end in production.
+    const detail = e instanceof Error ? e.message : String(e);
+    return NextResponse.json(
+      { error: `Couldn't process that image. Try another. (debug: ${detail})` },
+      { status: 400 },
+    );
   }
 
   let url: string;
