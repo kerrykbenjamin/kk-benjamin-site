@@ -72,6 +72,77 @@ default DESIGN_TOKENS.md tokens.
       (horizontal ≥768px / stacked mobile), deliverables checklist (✓), dark
       campaign spotlight, 4 icon stat cards + caption, reflection — fully
       populated, nothing lost vs the old template
+
+### Extended sections (doc-sourced content — NB / Throwback / Perfected Flower)
+- [ ] **Section order** matches: header → Challenge → Objectives → Audience +
+      Persona → Pillars → Visual identity (+ photography) → Strategy → Process
+      → Deliverables → Content mix → Campaign spotlight → Local marketing →
+      Marketing funnel → Sample performance metrics → Results → Key takeaways
+      → What I learned → Skills — only sections with data appear, in this order
+- [ ] **Background alternation is computed from VISIBLE sections**, not
+      hardcoded — no two adjacent sections share the same tint/card color on
+      ANY of the 4 pages, regardless of how many optional sections a study has
+- [ ] **Dunkin renders unchanged**: same section set, same content, same
+      template as before this work — it has none of the 10 new sections and is
+      not in the notes doc
+- [ ] **The Perfected Flower is the empty-state proof**: Target audience,
+      Persona, Brand pillars, photography-in-visual-identity, Deliverables,
+      Local marketing, Marketing funnel, and Sample performance metrics ALL
+      hide cleanly — no empty headings, no blank padded bands, no leftover
+      section wrapper
+- [ ] **Challenge / Objectives / Local marketing / Key takeaways** (generic
+      bullet-block sections): heading + intro + bulleted items + outro render
+      only where the study has that field; accent-dot bullets
+- [ ] **Target audience + Persona**: primary list (+ intro/secondary where
+      present) plus a distinct dark/onDark persona callout card — NOT styled
+      like a plain bullet list
+- [ ] **Brand pillars**: Natural Beauty's pillars (have descriptions) render as
+      a card grid; Throwback's pillars (no descriptions) render as a dark chip
+      row — both driven by the same data, no hardcoded per-project switch
+- [ ] **Photography style** list appears inside Visual identity for NB/Throwback
+      only; absent (not empty) on Perfected Flower/Dunkin
+- [ ] **Strategy sections** (Perfected Flower only): 5 numbered subsections,
+      each with circle badge + title, optional intro, 2-col bullets at `md`,
+      optional outro — reuses the ProcessSteps numbering language
+- [ ] **Deliverables — grouped mode**: NB (3 groups/13 items) and Throwback (3
+      groups/16 items) render subheadings per group; flat/ungrouped mode still
+      works unchanged for Dunkin
+- [ ] **Content mix bars**: bar widths are proportional to each category's
+      `percent` and the set sums to 100% per study (NB/PF 40/30/20/10,
+      Throwback 30/30/20/20) — CSS-only, no charting library
+- [ ] **Campaign spotlight text** (NB "Glow Naturally", Throwback "Flashback
+      Fridays"): name/description/element-list/outro render above the 3 photo
+      slots; Perfected Flower/Dunkin show photos only (no campaign copy), as
+      before
+- [ ] **Marketing funnel** (NB/Throwback, 4 stages each): horizontal with
+      connector lines at `lg`+, stacked at 375px — same visual language as
+      Process steps
+- [ ] **Sample performance metrics table**: real `<table>` at `sm+`, stacked
+      label/Before/After cards below `sm` — confirm **no horizontal overflow
+      at 375px** (`document.documentElement.scrollWidth <= innerWidth`); the
+      "projected outcomes for portfolio demonstration purposes" note is
+      visible in the viewport alongside the numbers on every study that has
+      this section; Throwback's "Online Orders" row reads Before "—" / After
+      "+38%"
+- [ ] **Skills chips**: dark/onDark pill row, flex-wraps at any count (NB 12,
+      Throwback 13, Perfected Flower 10)
+- [ ] **Numbers audit**: `+215%`, `+180%`, `+68%`, `+42%` do NOT appear
+      anywhere on Natural Beauty, Throwback Pizza, or The Perfected Flower;
+      they still appear (unchanged) on Dunkin. Each study's new stat card(s)
+      match the notes doc exactly — Natural Beauty is a single "+71%" card
+      (this is correct, not a bug — the doc gives only one numeric outcome for
+      that project)
+- [ ] **Palette contrast**: every new section's guaranteed-legible text (chips,
+      persona card, metric labels) uses the `dark`/`onDark` pairing, never
+      `accent` for text (`CASE_STUDY_PALETTES.md`)
+- [ ] **Editability**: every new field (challenge/objectives/audience/persona/
+      pillars/photography/strategy/deliverable groups/content mix/campaign
+      copy/funnel/metrics/skills) has a Field id registered in
+      `lib/content/registry.ts` and is reachable through the normal edit-mode
+      flow — the "projected outcomes" honesty notes and content-mix
+      percentages are intentionally NOT editable (verified via static id
+      cross-check against `data/caseStudies.ts`, not a live logged-in pass —
+      `.env.local` has no dev password configured in this environment)
 - [ ] **Visual identity section** (palette swatches + Typography block side-by-side
       ≥1024px, stacked below): shows for the 3 themed projects; **hides cleanly
       for Dunkin** (no palette, no fonts — section absent, not empty)
