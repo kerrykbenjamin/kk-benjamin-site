@@ -101,9 +101,11 @@ default DESIGN_TOKENS.md tokens.
       row — both driven by the same data, no hardcoded per-project switch
 - [ ] **Photography style** list appears inside Visual identity for NB/Throwback
       only; absent (not empty) on Perfected Flower/Dunkin
-- [ ] **Strategy sections** (Perfected Flower only): 5 numbered subsections,
-      each with circle badge + title, optional intro, 2-col bullets at `md`,
-      optional outro — reuses the ProcessSteps numbering language
+- [ ] **Strategy sections** (Perfected Flower only): 5 equal-width cards, each
+      with circle badge + title, optional intro, single-col bullets, optional
+      outro — 3-up top row + 2 CENTERED (not left-aligned/stretched) beneath at
+      `lg`, all five the same pixel width; 2-up at `md` with the 5th centered;
+      single stacked column on mobile
 - [ ] **Deliverables — grouped mode**: NB (3 groups/13 items) and Throwback (3
       groups/16 items) render subheadings per group; flat/ungrouped mode still
       works unchanged for Dunkin
@@ -128,10 +130,12 @@ default DESIGN_TOKENS.md tokens.
       Throwback 13, Perfected Flower 10)
 - [ ] **Numbers audit**: `+215%`, `+180%`, `+68%`, `+42%` do NOT appear
       anywhere on Natural Beauty, Throwback Pizza, or The Perfected Flower;
-      they still appear (unchanged) on Dunkin. Each study's new stat card(s)
-      match the notes doc exactly — Natural Beauty is a single "+71%" card
-      (this is correct, not a bug — the doc gives only one numeric outcome for
-      that project)
+      they still appear (unchanged) on Dunkin. Each study's stat card(s) match
+      the reference data exactly — Natural Beauty shows FOUR cards (71% social
+      audience, 141% engagement, 116% conversion, 75% email open rate), every
+      value derived from its own Before/After metrics table (2,400→4,100 /
+      2.7→6.5% / 1.8→3.9% / 24→42%); 4-across at `lg`, 2×2 at `sm`, stacked
+      below — never an orphaned card
 - [ ] **Palette contrast**: every new section's guaranteed-legible text (chips,
       persona card, metric labels) uses the `dark`/`onDark` pairing, never
       `accent` for text (`CASE_STUDY_PALETTES.md`)
@@ -157,11 +161,57 @@ default DESIGN_TOKENS.md tokens.
       swap-only (no remove control exists — do not add one)
 - [ ] **Deliverables** have NO dead space at any item count — filled cards pack
       the row (1-col mobile → 2-col desktop; lone odd item grows to fill)
-- [ ] **Campaign spotlight = 3 photos** (3-across ≥640px / stacked mobile) on the
-      dark surface; empty = intentional placeholder frames (not broken/empty);
-      NO "SHOP NOW" button or mockup copy remains
+- [ ] **Campaign spotlight = 3 media slots** (3-across ≥640px / stacked mobile)
+      on the dark surface; empty = intentional placeholder frames (not
+      broken/empty); NO "SHOP NOW" button or mockup copy remains
+- [ ] **Spotlight media (photo / GIF / video per slot — lib/media.ts)**:
+      - a mixed row keeps identical slot geometry (aspect 4/5, equal widths,
+        no layout shift) at every breakpoint
+      - video renders `<video muted loop playsinline preload="none">` with a
+        poster, autoplays only near the viewport (IntersectionObserver) and
+        NEVER for prefers-reduced-motion (poster + play control instead);
+        pauses when scrolled off-screen
+      - overlay controls ≥44×44 with state-tracking aria-labels ("Play/Pause
+        video", "Unmute/Mute video"), keyboard focusable, dark/onDark roles
+      - video is EXCLUDED from the lightbox (plays in place — its controls
+        own the click; no dead clicks); photos and GIFs keep the lightbox
+      - GIFs honor reduced motion via their stored `.poster` still + a
+        play/pause toggle; no poster stored → animated fallback (never blank)
+      - uploads: 15MB cap on all media; videos ≤30s (client gate + server
+        mvhd re-check for MP4); MP4/WebM only — .mov and other formats
+        rejected with the plain-English messages in lib/media.ts; oversized
+        GIF message steers toward video; caps enforced BEFORE upload
+      - edit mode: slots read "Add/Change media", the whole slot opens the
+        picker (playback/lightbox never fire), video preview is inert
+      - replacing a video with a photo clears the stale `.poster` key;
+        replacing a video without a fresh poster clears it too (the player
+        must never show the previous clip's frame)
+      - non-media image slots (process steps, gallery, hero) are byte-for-byte
+        unaffected: photo-only accept, GIFs there still flatten to static webp
 - [ ] **Results caption** centered under the 4 stat cards, no overflow at 375px
 - [ ] All 4 slugs resolve; back-to-portfolio link works
+
+### Layout format (wireframe pass — all case study pages)
+- [ ] **Header order**: back link → "Case Study" eyebrow + h1 title (full
+      content width) → media row → category eyebrow + intro (full width).
+      Media row at `lg` = hero image left (`8fr`, ≈60%, aspect 16/10) +
+      At-a-glance card right (`5fr`, ≈37%); below `lg` everything is one
+      column in that same reading order. Category/intro must not look
+      stranded below the media (block top margin `mt-10 lg:mt-12`). Container
+      max-width + gutters intact, no edge-to-edge bleed; title/category/intro
+      Fields stay editable (eyebrow is static by design)
+- [ ] **Skills demonstrated is section #2** on every study that has skills
+      (all but Dunkin) — immediately after the header, before The challenge;
+      chip component unchanged, only position moved
+- [ ] **What I learned** spans the content column: `max-w-[72ch]` on the
+      paragraph (≈960–1010px at 1440px, full column at ≤1024px), left-aligned,
+      ~72 chars/line
+- [ ] **Band-aware card surfaces**: every `<section>` sets `--cs-surface` to
+      the OPPOSITE of its band color; StatCard, pillar cards, deliverables
+      rows, metrics header/stacked cards, and strategy cards fill with
+      `var(--cs-surface)` — so no card can ever blend into its band no matter
+      how section parity shifts. Verify computed card bg ≠ section bg on all
+      4 pages (this regressed once when Skills moved and flipped parity)
 
 ## Edit mode
 - [ ] Logged OUT: zero edit traces (view-source too — no "Edit site", no ✎,

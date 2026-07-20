@@ -19,7 +19,7 @@ import { IconCheck } from "./icons";
  */
 function Row({ id }: { id: string }) {
   return (
-    <li className="flex min-w-[15rem] flex-1 items-center gap-3 rounded-[12px] bg-[var(--cs-card,#FFFAF4)] px-4 py-3.5 ring-1 ring-inset ring-[var(--cs-text,#1F2A19)]/5">
+    <li className="flex min-w-[15rem] flex-1 items-center gap-3 rounded-[12px] bg-[var(--cs-surface,#FFFAF4)] px-4 py-3.5 ring-1 ring-inset ring-[var(--cs-text,#1F2A19)]/5">
       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--cs-dark,#182312)] text-[var(--cs-on-dark,#FBF7F1)]">
         <IconCheck className="h-3.5 w-3.5" />
       </span>

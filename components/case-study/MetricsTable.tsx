@@ -38,7 +38,7 @@ export default function MetricsTable({
           return (
             <div
               key={i}
-              className="rounded-[12px] bg-[var(--cs-card,#FFFAF4)] p-4 ring-1 ring-inset ring-[var(--cs-text,#1F2A19)]/5"
+              className="rounded-[12px] bg-[var(--cs-surface,#FFFAF4)] p-4 ring-1 ring-inset ring-[var(--cs-text,#1F2A19)]/5"
             >
               {cell(n, "label", "block text-sm font-medium text-[var(--cs-text,#1F2A19)]")}
               <dl className="mt-2.5 grid grid-cols-2 gap-3">
@@ -68,7 +68,7 @@ export default function MetricsTable({
       <div className="mt-6 hidden overflow-hidden rounded-[14px] ring-1 ring-inset ring-[var(--cs-text,#1F2A19)]/10 sm:block">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="bg-[var(--cs-card,#FFFAF4)] text-[0.65rem] font-medium uppercase tracking-[0.14em] text-[var(--cs-text,#1F2A19)]/55">
+            <tr className="bg-[var(--cs-surface,#FFFAF4)] text-[0.65rem] font-medium uppercase tracking-[0.14em] text-[var(--cs-text,#1F2A19)]/55">
               <th scope="col" className="px-5 py-3.5 font-medium">Metric</th>
               <th scope="col" className="px-5 py-3.5 font-medium">Before</th>
               <th scope="col" className="px-5 py-3.5 font-medium">After (projected)</th>

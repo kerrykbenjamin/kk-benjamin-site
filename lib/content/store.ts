@@ -14,8 +14,12 @@ import { getField } from "./registry";
 export interface ContentStore {
   getAll(): Promise<Record<string, string>>;
   setText(key: string, value: string): Promise<void>;
-  /** Persist an already-processed image buffer; returns the public URL/path. */
-  setImage(key: string, buffer: Buffer, ext: string): Promise<string>;
+  /**
+   * Persist an already-processed media buffer; returns the public URL/path.
+   * `contentType` defaults to `image/<ext>` — video uploads MUST pass their
+   * real MIME type (video/mp4, video/webm) or Supabase serves them wrong.
+   */
+  setImage(key: string, buffer: Buffer, ext: string, contentType?: string): Promise<string>;
   readonly kind: "supabase" | "local";
 }
 
@@ -49,7 +53,9 @@ class LocalStore implements ContentStore {
     await this.writeAll(all);
   }
 
-  async setImage(key: string, buffer: Buffer, ext: string): Promise<string> {
+  async setImage(key: string, buffer: Buffer, ext: string, _contentType?: string): Promise<string> {
+    // (contentType is irrelevant locally — the file extension drives the MIME
+    // type when Next serves /public files.)
     // Capture the value being replaced BEFORE overwriting, so the old upload
     // can be cleaned up (filenames embed key + timestamp, so no URL is ever
     // shared between keys — deleting it can't break another slot).
@@ -117,7 +123,7 @@ class SupabaseStore implements ContentStore {
     if (error) throw new Error(error.message);
   }
 
-  async setImage(key: string, buffer: Buffer, ext: string): Promise<string> {
+  async setImage(key: string, buffer: Buffer, ext: string, contentType?: string): Promise<string> {
     const db = getAdminClient();
     if (!db) throw new Error("Supabase not configured");
 
@@ -139,7 +145,7 @@ class SupabaseStore implements ContentStore {
     const { error: upErr } = await db.storage
       .from(IMAGE_BUCKET)
       .upload(objectPath, buffer, {
-        contentType: `image/${ext}`,
+        contentType: contentType ?? `image/${ext}`,
         cacheControl: "31536000",
         upsert: true,
       });

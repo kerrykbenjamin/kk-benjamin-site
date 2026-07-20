@@ -44,7 +44,7 @@ export default function BrandPillars({
             {pillars.map((pl, i) => (
               <div
                 key={i}
-                className="rounded-[14px] bg-[var(--cs-card,#FFFAF4)] p-6 ring-1 ring-inset ring-[var(--cs-text,#1F2A19)]/5"
+                className="rounded-[14px] bg-[var(--cs-surface,#FFFAF4)] p-6 ring-1 ring-inset ring-[var(--cs-text,#1F2A19)]/5"
               >
                 <span
                   aria-hidden

@@ -13,9 +13,12 @@ import type { CampaignInfo } from "@/data/caseStudies";
  * the photos. Without it, the card is photos-only, exactly as before (Dunkin,
  * Perfected Flower).
  *
- * The three photos start as intentional placeholders (ImageSlot mode="show",
- * tone="dark") and are filled in by the client through the same edit-mode photo
- * flow. Three across on desktop, single column on mobile.
+ * The three slots start as intentional placeholders (ImageSlot mode="show",
+ * tone="dark") and are filled in by the client through the edit-mode media
+ * flow — each independently holds a photo, a GIF, or a short video clip
+ * (`mediaCapable` → caps/formats in lib/media.ts; video plays in place and
+ * skips the lightbox). Three across on desktop, single column on mobile; a
+ * video slot has identical geometry to a photo slot, so mixed rows stay even.
  */
 export default function SpotlightCallout({
   slug,
@@ -72,13 +75,14 @@ export default function SpotlightCallout({
           <ImageSlot
             key={n}
             id={`case.${slug}.spotlight.${n}.image`}
-            alt={`Campaign photo ${n}`}
+            alt={`Campaign media ${n}`}
             mode="show"
             tone="dark"
             lightbox={`case:${slug}`}
-            label={`Campaign photo ${n}`}
+            label={`Campaign media ${n}`}
             sizes="(max-width: 640px) 88vw, 30vw"
             wrapperClassName="relative aspect-[4/5] w-full overflow-hidden rounded-[12px]"
+            mediaCapable
           />
         ))}
       </div>

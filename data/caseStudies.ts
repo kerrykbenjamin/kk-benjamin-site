@@ -586,7 +586,12 @@ export const caseStudies: CaseStudy[] = [
       { label: "Repeat Customer Rate", before: "19%", after: "33%" },
       { label: "Average Monthly Website Visitors", before: "3,200", after: "6,900" },
     ],
-    results: [{ value: "71%", label: "Social Media Audience Increase" }],
+    results: [
+      { value: "71%", label: "Social Media Audience Increase" },
+      { value: "141%", label: "Average Engagement Rate Increase" },
+      { value: "116%", label: "Website Conversion Rate Increase" },
+      { value: "75%", label: "Email Open Rate Increase" },
+    ],
     resultsIntro:
       "The proposed strategy successfully created a premium yet approachable brand identity that resonated with the target audience.",
     resultsOutcomes: {

@@ -33,6 +33,13 @@ export type FieldDef = {
    * never distort or shift the step row).
    */
   square?: boolean;
+  /**
+   * Image fields only: this slot also accepts GIF and short video uploads
+   * (campaign-spotlight slots). Gates the video/GIF branch of the upload
+   * route — every other image field stays photo-only. See lib/media.ts for
+   * the caps/formats.
+   */
+  media?: boolean;
   default: string;
 };
 
@@ -228,13 +235,22 @@ for (const cs of caseStudies) {
       t(k(`font.${n}.role`), p, `${cs.title} — font ${n} role`, MAX.role, f.role),
     );
   });
-  // Campaign spotlight = three photos. All start empty → intentional
-  // placeholders; the client uploads real campaign photos through edit mode.
+  // Campaign spotlight = three MEDIA slots (photo, GIF, or short video —
+  // `media: true` gates the video/GIF upload branch; caps in lib/media.ts).
+  // All start empty → intentional placeholders; the client fills them through
+  // edit mode. Each slot has a companion `.poster` key written AUTOMATICALLY
+  // by the upload flow (video: client-captured first frame; GIF: sharp first
+  // frame) and read by the player for lazy-load / reduced-motion stills — it
+  // is never rendered as its own editable slot.
   // (The old campaign headline/sub/cta keys are intentionally retired — the
   // spotlight no longer renders them — so they're no longer registered.)
-  [1, 2, 3].forEach((n) =>
-    fields.push(img(k(`spotlight.${n}.image`), p, `${cs.title} — campaign photo ${n}`, "")),
-  );
+  [1, 2, 3].forEach((n) => {
+    fields.push({
+      ...img(k(`spotlight.${n}.image`), p, `${cs.title} — campaign media ${n}`, ""),
+      media: true,
+    });
+    fields.push(img(k(`spotlight.${n}.poster`), p, `${cs.title} — campaign media ${n} poster`, ""));
+  });
   cs.results.forEach((r, i) => {
     const n = i + 1;
     fields.push(

@@ -19,7 +19,7 @@ export default function StatCard({
 }) {
   const n = index + 1;
   return (
-    <div className="rounded-[14px] bg-[var(--cs-card,#FFFAF4)] p-6 text-center">
+    <div className="rounded-[14px] bg-[var(--cs-surface,#FFFAF4)] p-6 text-center">
       <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-[var(--cs-dark,#182312)] text-[var(--cs-on-dark,#FBF7F1)]">
         {icon}
       </span>

@@ -2,9 +2,12 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { getImage } from "@/lib/content";
 import { getIsEditor } from "@/lib/editor-state";
+import { mediaKindFromUrl, posterKeyFor } from "@/lib/media";
 import EditableImageSlot from "./EditableImageSlot";
 import SlotPlaceholder from "./SlotPlaceholder";
 import LightboxImage from "@/components/lightbox/LightboxImage";
+import SpotlightVideo from "@/components/media/SpotlightVideo";
+import SpotlightGif from "@/components/media/SpotlightGif";
 
 /**
  * An image slot that owns its own aspect-ratio wrapper (unlike ImageField, which
@@ -36,6 +39,7 @@ export default async function ImageSlot({
   imgClassName = "object-cover",
   lightboxCaption,
   wrapperClassName = "relative aspect-[4/3] w-full overflow-hidden rounded-[12px]",
+  mediaCapable = false,
 }: {
   id: string;
   alt: string;
@@ -54,8 +58,20 @@ export default async function ImageSlot({
   /** Optional title/desc shown inside the lightbox (bottom-left overlay). */
   lightboxCaption?: { title?: string; desc?: string };
   wrapperClassName?: string;
+  /**
+   * Campaign-spotlight slots only: the slot also holds GIFs and short videos
+   * (registry `media: true` + companion `.poster` key — see lib/media.ts).
+   * Every other ImageSlot use (process steps, gallery) leaves this off and is
+   * completely untouched by the media feature.
+   */
+  mediaCapable?: boolean;
 }) {
-  const [src, editor] = await Promise.all([getImage(id), getIsEditor()]);
+  const [src, editor, poster] = await Promise.all([
+    getImage(id),
+    getIsEditor(),
+    mediaCapable ? getImage(posterKeyFor(id)) : Promise.resolve(""),
+  ]);
+  const kind = mediaCapable && src ? mediaKindFromUrl(src) : "image";
 
   if (editor) {
     return (
@@ -72,6 +88,8 @@ export default async function ImageSlot({
         lightboxCaption={lightboxCaption}
         imgClassName={imgClassName}
         wrapperClassName={wrapperClassName}
+        mediaCapable={mediaCapable}
+        poster={poster}
       />
     );
   }
@@ -93,6 +111,34 @@ export default async function ImageSlot({
         }}
       >
         <SlotPlaceholder label={label} tone={tone} />
+      </div>
+    );
+  }
+
+  // Video plays in place — excluded from the lightbox by design (no dead
+  // clicks: its own play/pause/unmute controls own the interaction).
+  if (kind === "video") {
+    return (
+      <div className={wrapperClassName}>
+        <SpotlightVideo src={src} poster={poster || undefined} alt={alt} />
+      </div>
+    );
+  }
+
+  // GIFs keep the photo behavior (incl. lightbox) but honor reduced motion
+  // via the stored still frame + play toggle.
+  if (kind === "gif") {
+    return (
+      <div className={wrapperClassName}>
+        <SpotlightGif
+          src={src}
+          poster={poster || undefined}
+          alt={alt}
+          sizes={sizes}
+          className={imgClassName}
+          lightbox={lightbox}
+          caption={lightboxCaption}
+        />
       </div>
     );
   }

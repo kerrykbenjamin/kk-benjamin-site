@@ -107,33 +107,23 @@ export default async function RichCaseStudy({
           <span aria-hidden>←</span> Back to portfolio
         </Link>
 
-        <div className="mt-8 max-w-3xl">
+        <div className="mt-8">
           <SectionLabel>Case Study</SectionLabel>
           <Field
             id={`case.${slug}.title`}
             as="h1"
             className="mt-4 font-display text-display font-semibold text-[var(--cs-text,#1F2A19)]"
           />
-          <Field
-            id={`case.${slug}.category`}
-            as="p"
-            className="mt-4 eyebrow text-[var(--cs-text,#1F2A19)]/60"
-          />
-          <Field
-            id={`case.${slug}.intro`}
-            as="p"
-            className="mt-6 whitespace-pre-line text-lead text-[var(--cs-text,#1F2A19)]/70"
-          />
         </div>
 
-        <div className="mt-10 grid gap-8 lg:grid-cols-3 lg:gap-10">
-          <Reveal className="lg:col-span-2">
+        <div className="mt-8 grid gap-8 lg:grid-cols-[8fr_5fr] lg:gap-10 lg:mt-10">
+          <Reveal>
             <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[16px] bg-[var(--cs-card,#FFFAF4)]">
               <ImageField
                 id={`case.${slug}.image`}
                 alt={title}
                 priority
-                sizes="(max-width: 1024px) 100vw, 66vw"
+                sizes="(max-width: 1024px) 100vw, 60vw"
                 className="object-cover"
                 lightbox={`case:${slug}`}
               />
@@ -143,9 +133,37 @@ export default async function RichCaseStudy({
             <AtAGlanceCard slug={slug} />
           </Reveal>
         </div>
+
+        <Reveal delay={0.15}>
+          <div className="mt-10 lg:mt-12">
+            <Field
+              id={`case.${slug}.category`}
+              as="p"
+              className="eyebrow text-[var(--cs-text,#1F2A19)]/60"
+            />
+            <Field
+              id={`case.${slug}.intro`}
+              as="p"
+              className="mt-6 whitespace-pre-line text-lead text-[var(--cs-text,#1F2A19)]/70"
+            />
+          </div>
+        </Reveal>
       </>
     ),
   });
+
+  // Skills demonstrated
+  if (study.skills && study.skills.length > 0) {
+    sections.push({
+      key: "skills",
+      node: (
+        <>
+          <SectionLabel>Skills demonstrated</SectionLabel>
+          <SkillsChips slug={slug} count={study.skills.length} />
+        </>
+      ),
+    });
+  }
 
   // The challenge
   if (study.challenge) {
@@ -488,24 +506,11 @@ export default async function RichCaseStudy({
         <Field
           id={`case.${slug}.reflection`}
           as="p"
-          className="mt-6 max-w-3xl whitespace-pre-line font-display text-h3 leading-snug text-[var(--cs-text,#1F2A19)]"
+          className="mt-6 max-w-[72ch] whitespace-pre-line font-display text-h3 leading-snug text-[var(--cs-text,#1F2A19)]"
         />
       </>
     ),
   });
-
-  // Skills demonstrated
-  if (study.skills && study.skills.length > 0) {
-    sections.push({
-      key: "skills",
-      node: (
-        <>
-          <SectionLabel>Skills demonstrated</SectionLabel>
-          <SkillsChips slug={slug} count={study.skills.length} />
-        </>
-      ),
-    });
-  }
 
   return (
     <div style={cssVars} data-cs-theme-root>
@@ -513,6 +518,15 @@ export default async function RichCaseStudy({
         <section
           key={s.key}
           id={s.id}
+          // --cs-surface is always the OPPOSITE of this band's fill, so card-styled
+          // children (StatCard, pillar cards, checklist rows, table header, strategy
+          // cards) stay visible no matter which band the alternation assigns them.
+          style={
+            {
+              "--cs-surface":
+                i % 2 === 0 ? "var(--cs-card,#FFFAF4)" : "var(--cs-tint,#FBF7F1)",
+            } as CSSProperties
+          }
           className={`${s.id ? "scroll-mt-20 " : ""}${
             i % 2 === 0 ? "bg-[var(--cs-tint,#FBF7F1)]" : "bg-[var(--cs-card,#FFFAF4)]"
           }`}

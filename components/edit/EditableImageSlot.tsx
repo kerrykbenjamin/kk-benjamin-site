@@ -6,6 +6,72 @@ import { useRouter } from "next/navigation";
 import { useEdit } from "./EditProvider";
 import SlotPlaceholder from "./SlotPlaceholder";
 import LightboxImage from "@/components/lightbox/LightboxImage";
+import SpotlightVideo from "@/components/media/SpotlightVideo";
+import SpotlightGif from "@/components/media/SpotlightGif";
+import {
+  ACCEPTED_VIDEO_TYPES,
+  MAX_MEDIA_BYTES,
+  MAX_VIDEO_SECONDS,
+  MEDIA_ACCEPT,
+  MEDIA_ERRORS,
+  mediaKindFromUrl,
+} from "@/lib/media";
+
+/**
+ * Read a picked video's duration and grab a first-frame poster via canvas —
+ * all client-side (the server has no video decoder; no ffmpeg by design).
+ * Best-effort: resolves with whatever it managed to get within 4s. A video
+ * this browser can't decode yields {null, null} — the server still enforces
+ * type/size and (for MP4) re-checks duration from the file itself.
+ */
+function inspectVideo(file: File): Promise<{ poster: Blob | null; duration: number | null }> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const v = document.createElement("video");
+    let settled = false;
+    const done = (poster: Blob | null, duration: number | null) => {
+      if (settled) return;
+      settled = true;
+      URL.revokeObjectURL(url);
+      resolve({ poster, duration });
+    };
+    const timer = setTimeout(
+      () => done(null, Number.isFinite(v.duration) ? v.duration : null),
+      4000,
+    );
+    v.muted = true;
+    v.playsInline = true;
+    v.preload = "metadata";
+    v.onloadedmetadata = () => {
+      // Seek slightly in so the poster isn't a black leader frame.
+      v.currentTime = Math.min(0.1, (v.duration || 1) / 2);
+    };
+    v.onseeked = () => {
+      try {
+        const c = document.createElement("canvas");
+        c.width = v.videoWidth;
+        c.height = v.videoHeight;
+        c.getContext("2d")!.drawImage(v, 0, 0);
+        c.toBlob(
+          (b) => {
+            clearTimeout(timer);
+            done(b, v.duration);
+          },
+          "image/jpeg",
+          0.8,
+        );
+      } catch {
+        clearTimeout(timer);
+        done(null, v.duration);
+      }
+    };
+    v.onerror = () => {
+      clearTimeout(timer);
+      done(null, null);
+    };
+    v.src = url;
+  });
+}
 
 /**
  * Editor-side image slot. Three interaction states — none of them a dead
@@ -39,6 +105,8 @@ export default function EditableImageSlot({
   lightboxCaption,
   imgClassName = "object-cover",
   wrapperClassName,
+  mediaCapable = false,
+  poster,
 }: {
   fieldKey: string;
   src: string;
@@ -52,25 +120,65 @@ export default function EditableImageSlot({
   lightboxCaption?: { title?: string; desc?: string };
   imgClassName?: string;
   wrapperClassName: string;
+  /** Spotlight slots: also accepts GIF/short-video uploads (lib/media.ts). */
+  mediaCapable?: boolean;
+  /** Stored still frame for the slot's current video/GIF (may be empty). */
+  poster?: string;
 }) {
   const { editMode, toast } = useEdit();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  // Blob preview URLs have no extension, so remember what was picked.
+  const [previewIsVideo, setPreviewIsVideo] = useState(false);
 
   async function onFile(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast("That file isn't an image.", "error");
-      return;
+
+    const isVideo = file.type.startsWith("video/");
+    if (!mediaCapable) {
+      if (!file.type.startsWith("image/")) {
+        toast("That file isn't an image.", "error");
+        return;
+      }
+    } else {
+      // Media slot: photo, GIF, or short video — validate BEFORE uploading so
+      // rejections are instant and in plain English (lib/media.ts wording).
+      if (!file.type.startsWith("image/") && !isVideo) {
+        toast(MEDIA_ERRORS.notMedia, "error");
+        return;
+      }
+      if (isVideo && !(ACCEPTED_VIDEO_TYPES as readonly string[]).includes(file.type)) {
+        toast(MEDIA_ERRORS.badFormat, "error");
+        return;
+      }
+      if (file.size > MAX_MEDIA_BYTES) {
+        toast(file.type === "image/gif" ? MEDIA_ERRORS.gifTooLarge : MEDIA_ERRORS.tooLarge, "error");
+        return;
+      }
     }
-    setUploading(true);
-    setPreview(URL.createObjectURL(file));
+
     const fd = new FormData();
     fd.append("key", fieldKey);
     fd.append("file", file);
+
+    if (mediaCapable && isVideo) {
+      // Duration gate + poster grab happen here — the browser is the only
+      // place with a video decoder (no ffmpeg server-side, by design).
+      const { poster: posterBlob, duration } = await inspectVideo(file);
+      if (duration !== null && duration > MAX_VIDEO_SECONDS + 0.5) {
+        toast(MEDIA_ERRORS.tooLong, "error");
+        return;
+      }
+      if (duration !== null) fd.append("duration", String(duration));
+      if (posterBlob) fd.append("poster", new File([posterBlob], "poster.jpg", { type: "image/jpeg" }));
+    }
+
+    setUploading(true);
+    setPreviewIsVideo(isVideo);
+    setPreview(URL.createObjectURL(file));
     try {
       const res = await fetch("/api/content/image", { method: "POST", body: fd });
       const data = await res.json();
@@ -80,7 +188,7 @@ export default function EditableImageSlot({
         setUploading(false);
         return;
       }
-      toast("Photo updated");
+      toast(mediaCapable ? "Media updated" : "Photo updated");
       setUploading(false);
       router.refresh();
     } catch {
@@ -114,6 +222,30 @@ export default function EditableImageSlot({
         </div>
       );
     }
+    // Media slots: same rendering visitors get — video plays in place (no
+    // lightbox), GIFs honor reduced motion via their stored still.
+    if (mediaCapable && mediaKindFromUrl(shown) === "video") {
+      return (
+        <div className={wrapperClassName}>
+          <SpotlightVideo src={shown} poster={poster || undefined} alt={alt} />
+        </div>
+      );
+    }
+    if (mediaCapable && mediaKindFromUrl(shown) === "gif") {
+      return (
+        <div className={wrapperClassName}>
+          <SpotlightGif
+            src={shown}
+            poster={poster || undefined}
+            alt={alt}
+            sizes={sizes}
+            className={imgClassName}
+            lightbox={lightbox}
+            caption={lightboxCaption}
+          />
+        </div>
+      );
+    }
     if (lightbox) {
       return (
         <div className={wrapperClassName}>
@@ -144,14 +276,27 @@ export default function EditableImageSlot({
       onClick={() => inputRef.current?.click()}
     >
       {shown ? (
-        <Image
-          src={shown}
-          alt={alt}
-          fill
-          sizes={sizes}
-          className="object-cover"
-          unoptimized={Boolean(preview)}
-        />
+        (preview ? previewIsVideo : mediaCapable && mediaKindFromUrl(shown) === "video") ? (
+          // Edit-mode video preview: inert (the whole slot is the picker
+          // target), poster keeps it from being a black box before load.
+          <video
+            src={shown}
+            poster={preview ? undefined : poster || undefined}
+            muted
+            playsInline
+            preload="metadata"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <Image
+            src={shown}
+            alt={alt}
+            fill
+            sizes={sizes}
+            className="object-cover"
+            unoptimized={Boolean(preview) || (mediaCapable && mediaKindFromUrl(shown) === "gif")}
+          />
+        )
       ) : (
         emptyContent
       )}
@@ -164,7 +309,15 @@ export default function EditableImageSlot({
         disabled={uploading}
         className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-forest-deep/90 px-4 py-2 text-[0.72rem] font-medium uppercase tracking-[0.14em] text-cream shadow-lg backdrop-blur-sm transition-colors hover:bg-forest-deep disabled:opacity-70"
       >
-        {uploading ? "Uploading…" : shown ? "Change photo" : "Add photo"}
+        {uploading
+          ? "Uploading…"
+          : shown
+            ? mediaCapable
+              ? "Change media"
+              : "Change photo"
+            : mediaCapable
+              ? "Add media"
+              : "Add photo"}
       </button>
       {shown && (
         <span
@@ -175,7 +328,7 @@ export default function EditableImageSlot({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept={mediaCapable ? MEDIA_ACCEPT : "image/*"}
         className="hidden"
         onClick={(e) => e.stopPropagation()}
         onChange={onFile}
