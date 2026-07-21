@@ -64,10 +64,10 @@ optimizes it for you automatically.
 **Adding a photo to an empty spot.** Some picture spots start out without a
 photo on purpose:
 
-- **The three “Campaign media” spots** on each case study's spotlight band —
-  shown as a light dashed frame until you drop in your best campaign shots.
-  These three spots are special: they take **photos, GIFs, or short video
-  clips** — see the next section.
+- **The “Campaign media” spots** on each case study's spotlight band — shown
+  as a light dashed frame until you drop in your best campaign shots. There
+  are **six** of these per project and they play as a slideshow (carousel);
+  each one takes a **photo, GIF, or short video clip** — see the next section.
 - **The square photo under each step** of a case study's Process row — until
   you add a photo, it shows a tidy tile with a little icon and the step's name
   in your project's colors. Visitors see that tile too, and it's designed to
@@ -92,34 +92,51 @@ photo” like the rest). Two things to know about the Process photos:
   with a different one any time, but there's no way to take it back to the
   placeholder tile — so add photos when you have ones you like.
 
-### Campaign spotlight: photos, GIFs, or short videos
+### Campaign spotlight: a slideshow of photos, GIFs, or short videos
 
-The three **Campaign media** spots on each case study can hold more than
-photos. Tap **“Change media”** (or “Add media”) on any of the three and pick
-a photo, a GIF, or a **short video clip** from your phone or computer — it
-works exactly like changing a photo.
+The **Campaign media** area on each case study is a slideshow (carousel) with
+**six** slots. Each slot holds a **photo, a GIF, or a short video clip**. Turn
+on **“Edit site”**, then tap **“Change media”** (or “Add media”) on any slot
+and pick a file from your phone or computer — it works just like changing a
+photo.
 
-A few plain-language rules the app enforces for you:
+**How the slideshow behaves for visitors:**
 
-- **Videos: 30 seconds or less, and under 15MB.** If a clip is too long or
-  too big, you'll get a clear message right away — trim it or export a
-  smaller version and try again. Short clips look best here anyway.
+- It shows **one item at a time**, with left/right arrows and little dots to
+  jump between them. On a phone you can **swipe** sideways.
+- It **advances on its own** every few seconds, and quietly stops rotating the
+  moment someone taps an arrow, dot, or swipes — so it never yanks the slide
+  away while they're looking.
+- Only the slots you've filled appear. Fill two and visitors see a two-item
+  slideshow; fill one and it's just that single item with no arrows. Empty
+  slots only show to you (while editing) so you know where to add more.
+
+**A few plain-language rules the app enforces for you:**
+
+- **Videos: 30 seconds or less, and under 50MB.** If a clip is too long or too
+  big, you'll get a clear message right away — trim it or export a smaller
+  version. Short clips look best here anyway.
 - **Video files should be MP4** (the normal “video” format almost everything
   produces). If your iPhone saves a video as `.mov`, share/export it as MP4
   first — the app will tell you if it gets a format it can't use.
-- **GIFs also have the 15MB limit.** GIF files are surprisingly huge — if
+- **GIFs also have the 50MB limit.** GIF files are surprisingly huge — if
   yours is rejected, upload the same clip as an MP4 video instead; it'll be
   far smaller and look better.
+- **You'll see an upload bar with a percentage** for big videos — a 50MB clip
+  on a phone connection can take a minute, so that's normal. You can **cancel**
+  mid-upload, and if the connection drops you'll get a **Retry** button; your
+  existing slot is never left half-changed.
 - **Videos play automatically, silently, on a loop** — like Instagram.
   Visitors get a little button to unmute or pause. Photos and GIFs can still
   be tapped to view larger; videos just play right where they are.
-- For visitors who've turned on their device's “reduce motion” setting,
-  videos and GIFs politely hold still and show a play button instead.
+- For visitors who've turned on their device's “reduce motion” setting, the
+  slideshow doesn't auto-advance and videos/GIFs hold still with a play button.
 
-One thing to keep in mind: **video files are much heavier than photos.** A
-few clips are fine, but they use up storage and monthly bandwidth much
-faster — if the site ever feels slow to load or you hit a storage warning,
-videos are the first thing to trim back.
+**Please keep in mind — videos are heavy.** A 50MB clip is roughly fifty times
+the size of a photo. Filling many video slots will use up the site's storage
+and monthly data allowance quickly, which can slow the site down or cost money
+once it's on a paid plan. A couple of short clips per project is a good rule of
+thumb; use photos and GIFs for the rest.
 
 ## 5. Change your colors
 

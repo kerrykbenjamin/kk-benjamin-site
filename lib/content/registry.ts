@@ -3,6 +3,7 @@ import { valueProps } from "@/data/valueProps";
 import { testimonial } from "@/data/testimonials";
 import { portfolioIllustrations } from "@/data/portfolioIllustrations";
 import { site } from "@/data/site";
+import { SPOTLIGHT_SLOT_COUNT } from "@/lib/media";
 
 /**
  * The editable-content whitelist. This is the single source of truth for:
@@ -235,16 +236,18 @@ for (const cs of caseStudies) {
       t(k(`font.${n}.role`), p, `${cs.title} — font ${n} role`, MAX.role, f.role),
     );
   });
-  // Campaign spotlight = three MEDIA slots (photo, GIF, or short video —
-  // `media: true` gates the video/GIF upload branch; caps in lib/media.ts).
+  // Campaign spotlight = SPOTLIGHT_SLOT_COUNT media slots (photo, GIF, or
+  // short video — `media: true` gates the video/GIF upload branch; caps in
+  // lib/media.ts) rendered one-at-a-time by the spotlight carousel.
   // All start empty → intentional placeholders; the client fills them through
   // edit mode. Each slot has a companion `.poster` key written AUTOMATICALLY
   // by the upload flow (video: client-captured first frame; GIF: sharp first
   // frame) and read by the player for lazy-load / reduced-motion stills — it
-  // is never rendered as its own editable slot.
+  // is never rendered as its own editable slot. Slots 1–3 keep the exact key
+  // strings the original three-slot grid registered.
   // (The old campaign headline/sub/cta keys are intentionally retired — the
   // spotlight no longer renders them — so they're no longer registered.)
-  [1, 2, 3].forEach((n) => {
+  Array.from({ length: SPOTLIGHT_SLOT_COUNT }, (_, i) => i + 1).forEach((n) => {
     fields.push({
       ...img(k(`spotlight.${n}.image`), p, `${cs.title} — campaign media ${n}`, ""),
       media: true,

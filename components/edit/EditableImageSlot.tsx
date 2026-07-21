@@ -11,11 +11,13 @@ import SpotlightGif from "@/components/media/SpotlightGif";
 import {
   ACCEPTED_VIDEO_TYPES,
   MAX_MEDIA_BYTES,
+  MAX_PHOTO_BYTES,
   MAX_VIDEO_SECONDS,
   MEDIA_ACCEPT,
   MEDIA_ERRORS,
   mediaKindFromUrl,
 } from "@/lib/media";
+import { uploadSpotlightMedia } from "@/lib/media-upload";
 
 /**
  * Read a picked video's duration and grab a first-frame poster via canvas —
@@ -132,20 +134,24 @@ export default function EditableImageSlot({
   const [preview, setPreview] = useState<string | null>(null);
   // Blob preview URLs have no extension, so remember what was picked.
   const [previewIsVideo, setPreviewIsVideo] = useState(false);
+  // Upload progress 0–1 (null = indeterminate, e.g. a quick photo).
+  const [progress, setProgress] = useState<number | null>(null);
+  // Set while a large upload is in flight so it can be cancelled; also holds
+  // the last picked file so a timeout/drop offers a one-tap retry.
+  const abortRef = useRef<AbortController | null>(null);
+  const [retryFile, setRetryFile] = useState<File | null>(null);
 
-  async function onFile(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  async function runUpload(file: File) {
     const isVideo = file.type.startsWith("video/");
+    const isVideoOrGif = mediaCapable && (isVideo || file.type === "image/gif");
+
+    // ---- Client-side gating (instant, plain-English) ----
     if (!mediaCapable) {
       if (!file.type.startsWith("image/")) {
         toast("That file isn't an image.", "error");
         return;
       }
     } else {
-      // Media slot: photo, GIF, or short video — validate BEFORE uploading so
-      // rejections are instant and in plain English (lib/media.ts wording).
       if (!file.type.startsWith("image/") && !isVideo) {
         toast(MEDIA_ERRORS.notMedia, "error");
         return;
@@ -154,50 +160,83 @@ export default function EditableImageSlot({
         toast(MEDIA_ERRORS.badFormat, "error");
         return;
       }
-      if (file.size > MAX_MEDIA_BYTES) {
-        toast(file.type === "image/gif" ? MEDIA_ERRORS.gifTooLarge : MEDIA_ERRORS.tooLarge, "error");
-        return;
-      }
+    }
+    const isStill = !isVideo && file.type !== "image/gif";
+    const sizeCap = mediaCapable && !isStill ? MAX_MEDIA_BYTES : MAX_PHOTO_BYTES;
+    if (file.size > sizeCap) {
+      toast(
+        !mediaCapable || isStill
+          ? MEDIA_ERRORS.photoTooLarge
+          : file.type === "image/gif"
+            ? MEDIA_ERRORS.gifTooLarge
+            : MEDIA_ERRORS.tooLarge,
+        "error",
+      );
+      return;
     }
 
-    const fd = new FormData();
-    fd.append("key", fieldKey);
-    fd.append("file", file);
-
+    // ---- Video: measure duration + grab a poster (browser-only) ----
+    let duration: number | null = null;
+    let posterBlob: Blob | null = null;
     if (mediaCapable && isVideo) {
-      // Duration gate + poster grab happen here — the browser is the only
-      // place with a video decoder (no ffmpeg server-side, by design).
-      const { poster: posterBlob, duration } = await inspectVideo(file);
-      if (duration !== null && duration > MAX_VIDEO_SECONDS + 0.5) {
+      const inspected = await inspectVideo(file);
+      if (inspected.duration !== null && inspected.duration > MAX_VIDEO_SECONDS + 0.5) {
         toast(MEDIA_ERRORS.tooLong, "error");
         return;
       }
-      if (duration !== null) fd.append("duration", String(duration));
-      if (posterBlob) fd.append("poster", new File([posterBlob], "poster.jpg", { type: "image/jpeg" }));
+      duration = inspected.duration;
+      posterBlob = inspected.poster;
     }
 
+    const controller = new AbortController();
+    abortRef.current = controller;
     setUploading(true);
+    setRetryFile(null);
+    setProgress(isVideoOrGif ? 0 : null);
     setPreviewIsVideo(isVideo);
     setPreview(URL.createObjectURL(file));
-    try {
-      const res = await fetch("/api/content/image", { method: "POST", body: fd });
-      const data = await res.json();
-      if (!res.ok) {
-        toast(data.error ?? "Upload failed.", "error");
-        setPreview(null);
-        setUploading(false);
-        return;
-      }
+
+    const result = await uploadSpotlightMedia({
+      file,
+      fieldKey,
+      duration,
+      poster: posterBlob,
+      isVideoOrGif,
+      signal: controller.signal,
+      onProgress: (f) => setProgress(f),
+    });
+
+    abortRef.current = null;
+    setUploading(false);
+    setProgress(null);
+
+    if (result.ok) {
       toast(mediaCapable ? "Media updated" : "Photo updated");
-      setUploading(false);
       router.refresh();
-    } catch {
-      toast("Upload failed. Check your connection.", "error");
-      setPreview(null);
-      setUploading(false);
-    } finally {
-      if (inputRef.current) inputRef.current.value = "";
+      return;
     }
+    setPreview(null);
+    if (result.canceled) {
+      toast("Upload canceled.");
+    } else {
+      // Offer a retry for network failures (not for validation rejections,
+      // which won't succeed on a re-try of the same file).
+      const retryable =
+        result.error === MEDIA_ERRORS.uploadFailed || result.error === MEDIA_ERRORS.uploadTimeout;
+      if (retryable) setRetryFile(file);
+      toast(result.error, "error");
+    }
+  }
+
+  async function onFile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (inputRef.current) inputRef.current.value = "";
+    if (!file) return;
+    await runUpload(file);
+  }
+
+  function cancelUpload() {
+    abortRef.current?.abort();
   }
 
   const shown = preview ?? src;
@@ -271,9 +310,11 @@ export default function EditableImageSlot({
   // the visible affordance; stopPropagation keeps one gesture = one open).
   return (
     <div
-      className={`${wrapperClassName} cursor-pointer`}
+      className={`${wrapperClassName} ${uploading ? "cursor-default" : "cursor-pointer"}`}
       style={shown ? undefined : dashStyle}
-      onClick={() => inputRef.current?.click()}
+      onClick={() => {
+        if (!uploading) inputRef.current?.click();
+      }}
     >
       {shown ? (
         (preview ? previewIsVideo : mediaCapable && mediaKindFromUrl(shown) === "video") ? (
@@ -300,25 +341,95 @@ export default function EditableImageSlot({
       ) : (
         emptyContent
       )}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          inputRef.current?.click();
-        }}
-        disabled={uploading}
-        className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-forest-deep/90 px-4 py-2 text-[0.72rem] font-medium uppercase tracking-[0.14em] text-cream shadow-lg backdrop-blur-sm transition-colors hover:bg-forest-deep disabled:opacity-70"
-      >
-        {uploading
-          ? "Uploading…"
-          : shown
+      {uploading ? (
+        // In-flight overlay: real progress for big media + a Cancel control.
+        // A ≥60MB video on a phone can take a minute — a bare spinner reads as
+        // frozen, so show the percentage whenever it's known.
+        <div
+          className="absolute inset-x-3 bottom-3 z-20 flex flex-col gap-2 rounded-xl bg-forest-deep/90 px-3 py-2.5 text-cream shadow-lg backdrop-blur-sm"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between text-[0.7rem] font-medium uppercase tracking-[0.12em]">
+            <span>
+              {progress === null
+                ? "Uploading…"
+                : `Uploading ${Math.round(progress * 100)}%`}
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                cancelUpload();
+              }}
+              className="rounded-full px-2 py-0.5 text-cream/90 underline decoration-cream/40 underline-offset-2 hover:text-cream"
+            >
+              Cancel
+            </button>
+          </div>
+          <div
+            className="h-1.5 overflow-hidden rounded-full bg-cream/25"
+            role="progressbar"
+            aria-label="Upload progress"
+            aria-valuenow={progress === null ? undefined : Math.round(progress * 100)}
+          >
+            <div
+              className={`h-full rounded-full bg-cream transition-[width] duration-200 ${
+                progress === null ? "w-1/3 animate-pulse" : ""
+              }`}
+              style={progress === null ? undefined : { width: `${Math.round(progress * 100)}%` }}
+            />
+          </div>
+        </div>
+      ) : retryFile ? (
+        // Network failure/timeout left the slot unchanged — one-tap retry.
+        <div
+          className="absolute inset-x-3 bottom-3 z-20 flex items-center justify-center gap-3 rounded-full bg-forest-deep/90 px-4 py-2 text-[0.72rem] font-medium uppercase tracking-[0.14em] text-cream shadow-lg backdrop-blur-sm"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              const f = retryFile;
+              setRetryFile(null);
+              if (f) void runUpload(f);
+            }}
+            className="hover:text-cream/80"
+          >
+            Retry upload
+          </button>
+          <span aria-hidden className="text-cream/40">
+            ·
+          </span>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setRetryFile(null);
+            }}
+            className="text-cream/70 hover:text-cream"
+          >
+            Dismiss
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            inputRef.current?.click();
+          }}
+          className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-forest-deep/90 px-4 py-2 text-[0.72rem] font-medium uppercase tracking-[0.14em] text-cream shadow-lg backdrop-blur-sm transition-colors hover:bg-forest-deep"
+        >
+          {shown
             ? mediaCapable
               ? "Change media"
               : "Change photo"
             : mediaCapable
               ? "Add media"
               : "Add photo"}
-      </button>
+        </button>
+      )}
       {shown && (
         <span
           aria-hidden

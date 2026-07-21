@@ -6,6 +6,7 @@ import { getStore } from "@/lib/content/store";
 import {
   ACCEPTED_VIDEO_TYPES,
   MAX_MEDIA_BYTES,
+  MAX_PHOTO_BYTES,
   MAX_VIDEO_SECONDS,
   MEDIA_ERRORS,
   posterKeyFor,
@@ -13,7 +14,6 @@ import {
 
 export const runtime = "nodejs";
 
-const MAX_UPLOAD_BYTES = 15 * 1024 * 1024; // 15MB raw upload cap
 const MAX_DIMENSION = 2000; // px — cap longest side after resize
 
 /**
@@ -69,7 +69,12 @@ export async function POST(req: NextRequest) {
 
   // ------------------------------------------------------------ media slots --
   // Spotlight slots (`media: true` in the registry) also take GIFs and short
-  // videos. Everything else falls through to the photo-only path unchanged.
+  // videos, up to MAX_MEDIA_BYTES (50MB) — but ONLY in local dev. This
+  // multipart route is the LOCAL-DEV media path: in production the client
+  // goes /api/content/media/sign → direct PUT to Supabase Storage →
+  // /api/content/media/commit, because a 50MB body would 413 against
+  // Netlify's ~6MB function payload limit long before this code ran.
+  // Everything else falls through to the photo-only path unchanged.
   if (field.media && file.type.startsWith("video/")) {
     if (!(ACCEPTED_VIDEO_TYPES as readonly string[]).includes(file.type)) {
       return NextResponse.json({ error: MEDIA_ERRORS.badFormat }, { status: 400 });
@@ -132,8 +137,9 @@ export async function POST(req: NextRequest) {
 
   if (field.media && file.type === "image/gif") {
     // Real GIFs stay GIFs on media slots (everywhere else they still become a
-    // static webp via the photo path below). Same 15MB cap; the message steers
-    // big GIFs toward video instead.
+    // static webp via the photo path below). Shares the 50MB media cap (local
+    // dev only — see the media-slots note above); the message steers big GIFs
+    // toward video instead.
     if (file.size > MAX_MEDIA_BYTES) {
       return NextResponse.json({ error: MEDIA_ERRORS.gifTooLarge }, { status: 400 });
     }
@@ -163,8 +169,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, url });
   }
 
-  if (file.size > MAX_UPLOAD_BYTES) {
-    return NextResponse.json({ error: "That photo is too large (max 15MB)." }, { status: 400 });
+  if (file.size > MAX_PHOTO_BYTES) {
+    return NextResponse.json({ error: MEDIA_ERRORS.photoTooLarge }, { status: 400 });
   }
 
   let processed: Buffer;

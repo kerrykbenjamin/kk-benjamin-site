@@ -1,32 +1,54 @@
 import Field from "@/components/edit/Field";
-import ImageSlot from "@/components/edit/ImageSlot";
+import SpotlightCarousel, { type SpotlightSlide } from "@/components/media/SpotlightCarousel";
+import SpotlightCarouselEditor from "@/components/media/SpotlightCarouselEditor";
+import { getImage } from "@/lib/content";
+import { getIsEditor } from "@/lib/editor-state";
+import { posterKeyFor, SPOTLIGHT_SLOT_COUNT } from "@/lib/media";
 import type { CampaignInfo } from "@/data/caseStudies";
 
 /**
- * Campaign spotlight — a dark card holding three campaign photos (replaces the
- * old mocked ad + "SHOP NOW" button). Keeps the theme's `dark`/`onDark` pairing
- * (validated 5:1–9:1 contrast per project — CASE_STUDY_PALETTES.md).
+ * Campaign spotlight — a dark card holding the featured campaign media
+ * (replaces the old mocked ad + "SHOP NOW" button). Keeps the theme's
+ * `dark`/`onDark` pairing (validated 5:1–9:1 contrast per project —
+ * CASE_STUDY_PALETTES.md).
  *
  * When the study carries doc-sourced campaign copy (`info` — e.g. NB's "Glow
  * Naturally", Throwback's "Flashback Fridays"), the card leads with the
  * campaign name, description and element list (keys under `featured.*`), then
- * the photos. Without it, the card is photos-only, exactly as before (Dunkin,
+ * the media. Without it, the card is media-only, exactly as before (Dunkin,
  * Perfected Flower).
  *
- * The three slots start as intentional placeholders (ImageSlot mode="show",
- * tone="dark") and are filled in by the client through the edit-mode media
- * flow — each independently holds a photo, a GIF, or a short video clip
- * (`mediaCapable` → caps/formats in lib/media.ts; video plays in place and
- * skips the lightbox). Three across on desktop, single column on mobile; a
- * video slot has identical geometry to a photo slot, so mixed rows stay even.
+ * The media area is a ONE-at-a-time carousel over SPOTLIGHT_SLOT_COUNT slots
+ * (keys `case.<slug>.spotlight.<n>.image` + companion `.poster`). Each slot
+ * independently holds a photo, a GIF, or a short video clip (caps/formats in
+ * lib/media.ts; video plays in place and skips the lightbox). Slot values are
+ * gathered HERE, server-side, so the client carousel receives plain data —
+ * empty slots are skipped for visitors, and all slots become editable slides
+ * in edit mode (see SpotlightCarousel for the full rules).
  */
-export default function SpotlightCallout({
+export default async function SpotlightCallout({
   slug,
   info,
 }: {
   slug: string;
   info?: CampaignInfo;
 }) {
+  const [editor, slides] = await Promise.all([
+    getIsEditor(),
+    Promise.all(
+      Array.from({ length: SPOTLIGHT_SLOT_COUNT }, (_, i) => i + 1).map(
+        async (n): Promise<SpotlightSlide> => {
+          const key = `case.${slug}.spotlight.${n}.image`;
+          const [src, poster] = await Promise.all([
+            getImage(key),
+            getImage(posterKeyFor(key)),
+          ]);
+          return { n, key, src, poster };
+        },
+      ),
+    ),
+  ]);
+
   return (
     <div className="overflow-hidden rounded-[18px] bg-[var(--cs-dark,#182312)] px-6 py-12 text-[var(--cs-on-dark,#FBF7F1)] sm:px-10 sm:py-16">
       <p className="eyebrow text-center text-[var(--cs-on-dark,#FBF7F1)]/70">
@@ -70,21 +92,12 @@ export default function SpotlightCallout({
         </div>
       )}
 
-      <div className="mx-auto mt-8 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
-        {[1, 2, 3].map((n) => (
-          <ImageSlot
-            key={n}
-            id={`case.${slug}.spotlight.${n}.image`}
-            alt={`Campaign media ${n}`}
-            mode="show"
-            tone="dark"
-            lightbox={`case:${slug}`}
-            label={`Campaign media ${n}`}
-            sizes="(max-width: 640px) 88vw, 30vw"
-            wrapperClassName="relative aspect-[4/5] w-full overflow-hidden rounded-[12px]"
-            mediaCapable
-          />
-        ))}
+      <div className="mx-auto mt-8 w-full max-w-3xl">
+        {editor ? (
+          <SpotlightCarouselEditor slug={slug} slides={slides} />
+        ) : (
+          <SpotlightCarousel slug={slug} slides={slides} editMode={false} />
+        )}
       </div>
     </div>
   );

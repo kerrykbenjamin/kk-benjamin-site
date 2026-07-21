@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { MAX_VIDEO_SECONDS } from "@/lib/media";
 
 /**
  * Campaign-spotlight video player. Behavior contract (see lib/media.ts):
@@ -16,15 +17,31 @@ import { useEffect, useRef, useState } from "react";
  *  - Fills its aspect-ratio wrapper exactly like a photo slot (absolute
  *    inset-0 + object-cover) ⇒ a mixed photo/GIF/video row stays even.
  *  - Excluded from the lightbox by design — it already plays in place.
+ *
+ * Carousel integration:
+ *  - `active` (default true, for standalone use): when false — the slide is
+ *    not the carousel's current one — the video is force-paused and can never
+ *    start, so only the active slide's video ever plays.
+ *  - `onHoldChange`: while this video is playing, the carousel holds its
+ *    auto-advance so the clip is never cut off mid-view. The hold releases
+ *    after ONE full play-through (the clip's own duration, capped at the
+ *    MAX_VIDEO_SECONDS upload limit) — looping clips then keep looping, but
+ *    the deck is free to advance on its next tick.
  */
 export default function SpotlightVideo({
   src,
   poster,
   alt,
+  active = true,
+  onHoldChange,
 }: {
   src: string;
   poster?: string;
   alt?: string;
+  /** False when this is a non-current carousel slide — playback is blocked. */
+  active?: boolean;
+  /** Carousel hook: true while auto-advance should wait for this video. */
+  onHoldChange?: (hold: boolean) => void;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -33,6 +50,14 @@ export default function SpotlightVideo({
   const [muted, setMuted] = useState(true);
   // Set once the USER pauses — in-view autoplay must not fight that choice.
   const userPaused = useRef(false);
+  const inView = useRef(false);
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Keep the latest callback out of effect deps (parent recreates it per
+  // render) — updated in an effect so no ref is written during render.
+  const holdCb = useRef(onHoldChange);
+  useEffect(() => {
+    holdCb.current = onHoldChange;
+  });
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -48,8 +73,9 @@ export default function SpotlightVideo({
     if (!wrap || !video) return;
     const io = new IntersectionObserver(
       ([entry]) => {
+        inView.current = entry.isIntersecting;
         if (entry.isIntersecting) {
-          if (!reduced && !userPaused.current) video.play().catch(() => {});
+          if (active && !reduced && !userPaused.current) video.play().catch(() => {});
         } else {
           video.pause(); // off-screen: stop spending battery/bandwidth
         }
@@ -58,7 +84,27 @@ export default function SpotlightVideo({
     );
     io.observe(wrap);
     return () => io.disconnect();
-  }, [reduced]);
+  }, [reduced, active]);
+
+  // Carousel activation: pause the moment this slide stops being current;
+  // (re)start when it becomes current again and nothing else forbids it.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (!active) {
+      video.pause();
+      return;
+    }
+    if (inView.current && !reduced && !userPaused.current) video.play().catch(() => {});
+  }, [active, reduced]);
+
+  // Release the hold (and its timer) whenever we unmount or deactivate.
+  useEffect(() => {
+    return () => {
+      if (holdTimer.current) clearTimeout(holdTimer.current);
+      holdCb.current?.(false);
+    };
+  }, [active]);
 
   function togglePlay() {
     const video = videoRef.current;
@@ -99,8 +145,29 @@ export default function SpotlightVideo({
         preload="none"
         aria-label={alt}
         className="absolute inset-0 h-full w-full object-cover"
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
+        onPlay={() => {
+          setPlaying(true);
+          // Hold the carousel for one play-through so the clip isn't cut off
+          // mid-view. Cap the hold at the upload duration limit as a safety
+          // net (a mis-reported duration can't wedge the deck forever).
+          if (holdTimer.current) clearTimeout(holdTimer.current);
+          const v = videoRef.current;
+          const remaining =
+            v && Number.isFinite(v.duration) && v.duration > 0
+              ? Math.min(v.duration - v.currentTime, MAX_VIDEO_SECONDS)
+              : MAX_VIDEO_SECONDS;
+          holdCb.current?.(true);
+          holdTimer.current = setTimeout(
+            () => holdCb.current?.(false),
+            Math.max(0, remaining) * 1000 + 250,
+          );
+        }}
+        onPause={() => {
+          setPlaying(false);
+          // User (or deactivation) paused: release the deck immediately.
+          if (holdTimer.current) clearTimeout(holdTimer.current);
+          holdCb.current?.(false);
+        }}
       />
 
       {/* Reduced-motion (or not-yet-started) state: prominent centered play */}

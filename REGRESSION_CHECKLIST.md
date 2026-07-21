@@ -161,33 +161,71 @@ default DESIGN_TOKENS.md tokens.
       swap-only (no remove control exists — do not add one)
 - [ ] **Deliverables** have NO dead space at any item count — filled cards pack
       the row (1-col mobile → 2-col desktop; lone odd item grows to fill)
-- [ ] **Campaign spotlight = 3 media slots** (3-across ≥640px / stacked mobile)
-      on the dark surface; empty = intentional placeholder frames (not
-      broken/empty); NO "SHOP NOW" button or mockup copy remains
-- [ ] **Spotlight media (photo / GIF / video per slot — lib/media.ts)**:
-      - a mixed row keeps identical slot geometry (aspect 4/5, equal widths,
-        no layout shift) at every breakpoint
-      - video renders `<video muted loop playsinline preload="none">` with a
-        poster, autoplays only near the viewport (IntersectionObserver) and
-        NEVER for prefers-reduced-motion (poster + play control instead);
-        pauses when scrolled off-screen
-      - overlay controls ≥44×44 with state-tracking aria-labels ("Play/Pause
-        video", "Unmute/Mute video"), keyboard focusable, dark/onDark roles
-      - video is EXCLUDED from the lightbox (plays in place — its controls
-        own the click; no dead clicks); photos and GIFs keep the lightbox
-      - GIFs honor reduced motion via their stored `.poster` still + a
-        play/pause toggle; no poster stored → animated fallback (never blank)
-      - uploads: 15MB cap on all media; videos ≤30s (client gate + server
-        mvhd re-check for MP4); MP4/WebM only — .mov and other formats
-        rejected with the plain-English messages in lib/media.ts; oversized
-        GIF message steers toward video; caps enforced BEFORE upload
-      - edit mode: slots read "Add/Change media", the whole slot opens the
-        picker (playback/lightbox never fire), video preview is inert
-      - replacing a video with a photo clears the stale `.poster` key;
-        replacing a video without a fresh poster clears it too (the player
-        must never show the previous clip's frame)
-      - non-media image slots (process steps, gallery, hero) are byte-for-byte
-        unaffected: photo-only accept, GIFs there still flatten to static webp
+- [ ] **Campaign spotlight = a carousel over SPOTLIGHT_SLOT_COUNT (6) media
+      slots** on the dark surface; featured single item centered in `max-w-3xl`,
+      aspect 4/3; NO "SHOP NOW" button or mockup copy remains
+- [ ] **Spotlight carousel (SpotlightCarousel — all 4 pages)**:
+      - shows ONE item at a time; every slide identical dimensions → zero
+        layout shift between a photo, GIF, and video slide (verify equal widths
+        at 375 / 768 / 1024 / 1440)
+      - empty slots are SKIPPED for visitors (2 filled → 2-item carousel);
+        0 filled → one static dashed "Campaign media" placeholder, no controls;
+        1 filled → static single item, no arrows/dots/auto-advance;
+        ≥2 filled → full carousel
+      - controls: prev/next arrows ≥44×44 (`aria-label` "Previous"/"Next"),
+        dots with `aria-label` "Go to slide N" + `aria-current`, ArrowLeft/Right
+        when focused; `role="region"` + `aria-roledescription="carousel"`,
+        slides `aria-roledescription="slide"` labeled "N of M", polite live
+        region announces "Slide N of M"
+      - arrows BRACKET the media (flex siblings in the card padding) and never
+        overlap the photo/GIF/video — verify prev.right ≤ frame.left and
+        next.left ≥ frame.right at 768/1024/1440; below `sm` (375) the arrows
+        are hidden (no room outside the frame) and swipe + dots + ArrowLeft/
+        Right drive it, media using the full width
+      - swipe: `touch-action: pan-y` on the track (horizontal swipe advances,
+        vertical gesture still scrolls the page); a swipe suppresses the slide's
+        click (no accidental lightbox), a plain tap passes through
+      - auto-advance every 6s; pauses on hover / focus-within / off-screen
+        (IntersectionObserver) and stops PERMANENTLY after any interaction;
+        under prefers-reduced-motion: no auto-advance AND instant (no slide
+        transition)
+      - wrap-around both directions (last→first, first→last)
+      - LAZY: full media mounts only for the active slide + the next slide
+        (wrap-aware); other slides render just their stored still — six videos
+        never load at once
+      - only the ACTIVE slide's video plays; leaving a slide pauses its video;
+        a playing video HOLDS auto-advance for one play-through (capped at the
+        30s upload limit) so it isn't cut off mid-view
+- [ ] **Spotlight media rendering (per slide — lib/media.ts)**:
+      - video: `<video muted loop playsinline preload="none">` + poster,
+        autoplay only when active + near viewport, NEVER under reduced motion
+        (poster + play control); overlay controls ≥44×44 with state-tracking
+        aria-labels ("Play/Pause video", "Unmute/Mute video"); EXCLUDED from
+        the lightbox (plays in place, no dead clicks)
+      - GIF: honors reduced motion via stored `.poster` still + play toggle;
+        keeps the lightbox; no poster → animated fallback (never blank)
+      - photo: keeps the lightbox
+- [ ] **Media uploads (50MB — direct-to-storage in production)**:
+      - video/GIF cap 50MB, photos 15MB; videos ≤30s (client gate + server
+        MP4 mvhd re-check); MP4/WebM only — .mov/others rejected with the
+        plain-English lib/media.ts messages; caps enforced BEFORE upload
+      - **production path**: /api/content/media/sign (JSON, tiny) → browser PUTs
+        the file DIRECT to Supabase Storage (never through a function — a 50MB
+        body would 413 on Netlify's ~6MB limit) → /api/content/media/commit
+        (tiny) records the path + poster; **local dev**: sign returns
+        `{mode:"local"}` → multipart /api/content/image (no function limit)
+      - commit validates the object path matches `safeKeyForFile(key)-<ts>.ext`
+        (can't point a slot at arbitrary objects) and re-checks the stored
+        object's real size (purges + rejects an oversized upload)
+      - all 3 upload endpoints (sign, commit, image) 401 when logged out
+      - UX: real % progress bar for video/GIF, Cancel mid-upload, Retry on
+        timeout/dropped connection (stall = 30s no-progress), slot never left
+        half-changed; edit-mode slot reads "Add/Change media", whole slot opens
+        the picker (playback/lightbox suppressed), video preview inert
+      - replacing a video with a photo clears the stale `.poster`; replacing a
+        video without a fresh poster clears it too
+      - non-media image slots (process steps, gallery, hero) unaffected:
+        photo-only accept, 15MB cap, GIFs there still flatten to static webp
 - [ ] **Results caption** centered under the 4 stat cards, no overflow at 375px
 - [ ] All 4 slugs resolve; back-to-portfolio link works
 
