@@ -20,6 +20,7 @@ import BrandPillars from "./BrandPillars";
 import ContentMixBars from "./ContentMixBars";
 import MarketingFunnel from "./MarketingFunnel";
 import MetricsTable from "./MetricsTable";
+import FinancialHighlights from "./FinancialHighlights";
 import SkillsChips from "./SkillsChips";
 import StrategySections from "./StrategySections";
 import { IconBag, IconCursor, IconHeart, IconUsers } from "./icons";
@@ -130,7 +131,7 @@ export default async function RichCaseStudy({
             </div>
           </Reveal>
           <Reveal delay={0.1}>
-            <AtAGlanceCard slug={slug} />
+            <AtAGlanceCard slug={slug} keys={study.meta.map((m) => m.key)} />
           </Reveal>
         </div>
 
@@ -216,18 +217,59 @@ export default async function RichCaseStudy({
     });
   }
 
-  // Brand positioning / pillars
+  // "My role" — what the designer personally developed (Dunkin)
+  if (study.role) {
+    sections.push({
+      key: "role",
+      node: (
+        <>
+          <SectionLabel>My role</SectionLabel>
+          <CaseBulletList
+            slug={slug}
+            name="role"
+            count={study.role.items.length}
+            hasIntro={!!study.role.intro}
+            hasOutro={!!study.role.outro}
+            columns={2}
+          />
+        </>
+      ),
+    });
+  }
+
+  // Brand positioning / pillars (label varies — Dunkin's doc calls it Strategy)
   if (study.positioning || (study.pillars && study.pillars.length > 0)) {
     sections.push({
       key: "pillars",
       node: (
         <>
-          <SectionLabel>Brand positioning</SectionLabel>
+          <SectionLabel>{study.pillarsLabel ?? "Brand positioning"}</SectionLabel>
           <BrandPillars
             slug={slug}
             positioning={study.positioning}
             hasIntro={!!study.pillarsIntro}
+            hasOutro={!!study.pillarsOutro}
             pillars={study.pillars}
+          />
+        </>
+      ),
+    });
+  }
+
+  // Creative direction (Dunkin)
+  if (study.creative) {
+    sections.push({
+      key: "creative",
+      node: (
+        <>
+          <SectionLabel>Creative direction</SectionLabel>
+          <CaseBulletList
+            slug={slug}
+            name="creative"
+            count={study.creative.items.length}
+            hasIntro={!!study.creative.intro}
+            hasOutro={!!study.creative.outro}
+            columns={2}
           />
         </>
       ),
@@ -323,18 +365,21 @@ export default async function RichCaseStudy({
     });
   }
 
-  // Process (always)
-  sections.push({
-    key: "process",
-    node: (
-      <>
-        <SectionLabel>Process</SectionLabel>
-        <div className="mt-10">
-          <ProcessSteps slug={slug} count={study.designProcess.length} />
-        </div>
-      </>
-    ),
-  });
+  // Process — hides when a study's notes supply no steps (Dunkin), rather than
+  // rendering an empty band or borrowing another project's branding steps.
+  if (study.designProcess.length > 0) {
+    sections.push({
+      key: "process",
+      node: (
+        <>
+          <SectionLabel>Process</SectionLabel>
+          <div className="mt-10">
+            <ProcessSteps slug={slug} count={study.designProcess.length} />
+          </div>
+        </>
+      ),
+    });
+  }
 
   // Deliverables — grouped (doc) or flat (legacy); hides when a study has neither
   if (
@@ -345,7 +390,7 @@ export default async function RichCaseStudy({
       key: "deliverables",
       node: (
         <>
-          <SectionLabel>Deliverables</SectionLabel>
+          <SectionLabel>{study.deliverablesLabel ?? "Deliverables"}</SectionLabel>
           <div className="mt-8 max-w-3xl">
             <DeliverablesChecklist
               slug={slug}
@@ -410,6 +455,47 @@ export default async function RichCaseStudy({
     });
   }
 
+  // Financial highlights — proposed figures (Dunkin capstone). The projection
+  // disclaimer sits beside the label and is non-editable by design.
+  if (study.financials && study.financials.figures.length > 0) {
+    sections.push({
+      key: "financials",
+      node: (
+        <>
+          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            <SectionLabel>Financial highlights</SectionLabel>
+            {study.financialsNote && (
+              <span className="text-xs italic text-[var(--cs-text,#1F2A19)]/50">
+                {study.financialsNote}
+              </span>
+            )}
+          </div>
+          <FinancialHighlights slug={slug} data={study.financials} />
+        </>
+      ),
+    });
+  }
+
+  // Success metrics — what the campaign would measure (Dunkin)
+  if (study.successMetrics) {
+    sections.push({
+      key: "successmetrics",
+      node: (
+        <>
+          <SectionLabel>Success metrics</SectionLabel>
+          <CaseBulletList
+            slug={slug}
+            name="metricslist"
+            count={study.successMetrics.items.length}
+            hasIntro={!!study.successMetrics.intro}
+            hasOutro={!!study.successMetrics.outro}
+            columns={2}
+          />
+        </>
+      ),
+    });
+  }
+
   // Performance metrics (Before/After table, labeled projected)
   if (study.metrics && study.metrics.length > 0) {
     sections.push({
@@ -452,11 +538,13 @@ export default async function RichCaseStudy({
             className="mt-6 max-w-3xl whitespace-pre-line text-lead text-[var(--cs-text,#1F2A19)]/75"
           />
         )}
-        <div className={statGrid}>
-          {study.results.map((_, i) => (
-            <StatCard key={i} slug={slug} index={i} icon={STAT_ICONS[i % STAT_ICONS.length]} />
-          ))}
-        </div>
+        {study.results.length > 0 && (
+          <div className={statGrid}>
+            {study.results.map((_, i) => (
+              <StatCard key={i} slug={slug} index={i} icon={STAT_ICONS[i % STAT_ICONS.length]} />
+            ))}
+          </div>
+        )}
         {study.resultsOutcomes && (
           <div className="mt-10">
             <CaseBulletList
@@ -468,11 +556,13 @@ export default async function RichCaseStudy({
             />
           </div>
         )}
-        <Field
-          id={`case.${slug}.results.caption`}
-          as="p"
-          className="mx-auto mt-8 max-w-2xl whitespace-pre-line text-center text-sm text-[var(--cs-text,#1F2A19)]/55"
-        />
+        {study.resultsCaption !== "" && (
+          <Field
+            id={`case.${slug}.results.caption`}
+            as="p"
+            className="mx-auto mt-8 max-w-2xl whitespace-pre-line text-center text-sm text-[var(--cs-text,#1F2A19)]/55"
+          />
+        )}
       </>
     ),
   });
@@ -497,20 +587,23 @@ export default async function RichCaseStudy({
     });
   }
 
-  // Reflection / what I learned (always)
-  sections.push({
-    key: "reflection",
-    node: (
-      <>
-        <SectionLabel>What I learned</SectionLabel>
-        <Field
-          id={`case.${slug}.reflection`}
-          as="p"
-          className="mt-6 max-w-[72ch] whitespace-pre-line font-display text-h3 leading-snug text-[var(--cs-text,#1F2A19)]"
-        />
-      </>
-    ),
-  });
+  // Reflection / what I learned — hides when the notes supply none (Dunkin),
+  // rather than rendering an empty heading over a blank band.
+  if (study.reflection !== "") {
+    sections.push({
+      key: "reflection",
+      node: (
+        <>
+          <SectionLabel>What I learned</SectionLabel>
+          <Field
+            id={`case.${slug}.reflection`}
+            as="p"
+            className="mt-6 max-w-[72ch] whitespace-pre-line font-display text-h3 leading-snug text-[var(--cs-text,#1F2A19)]"
+          />
+        </>
+      ),
+    });
+  }
 
   return (
     <div style={cssVars} data-cs-theme-root>

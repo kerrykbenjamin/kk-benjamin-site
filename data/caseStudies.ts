@@ -40,6 +40,14 @@ export type MixCategory = { percent: number; label: string; items: string[] };
 export type FunnelStage = { title: string; items: string[] };
 export type MetricRow = { label: string; before: string; after: string };
 export type DeliverableGroup = { title: string; items: string[] };
+/** One figure in the Financial highlights block (label + formatted value). */
+export type FinancialFigure = { label: string; value: string };
+/**
+ * Financial highlights. Used by Dunkin, whose figures are PROPOSED capstone
+ * projections — the non-editable `financialsNote` renders beside them so the
+ * projection framing can't be casually deleted in edit mode.
+ */
+export type Financials = { intro?: string; figures: FinancialFigure[]; outro?: string };
 /** Featured/sample campaign copy shown inside the campaign-spotlight card. */
 export type CampaignInfo = {
   /** Section eyebrow, e.g. "Sample campaign" / "Featured campaign" (doc wording). */
@@ -79,8 +87,8 @@ export type CaseStudy = {
   strategy: string[];
   designProcess: string[];
   deliverables: string[];
-  /** Legacy home-page campaign copy — retired from the template; kept only so
-   *  Dunkin's untouched sharedBody still typechecks. */
+  /** Legacy home-page campaign copy — retired from the template and no longer
+   *  set by any study; kept optional so an old data shape still typechecks. */
   campaign?: { headline: string; sub: string; cta: string };
   results: Stat[];
   reflection: string;
@@ -116,6 +124,24 @@ export type CaseStudy = {
   contentMixIntro?: string;
   contentMix?: MixCategory[];
   campaignInfo?: CampaignInfo;
+  /** "My role" block — what the designer personally developed (Dunkin). */
+  role?: BulletBlock;
+  /** Creative-direction block (Dunkin). */
+  creative?: BulletBlock;
+  /** Section eyebrow for the positioning/pillars block — the doc's own wording
+   *  varies ("Brand Positioning" for NB/TP, "Strategy" for Dunkin). */
+  pillarsLabel?: string;
+  /** Closing line beneath the pillars (Dunkin's positioning rationale). */
+  pillarsOutro?: string;
+  /** Section eyebrow for the deliverables block — Dunkin's grouped list is the
+   *  doc's "Marketing Campaign" channels, not deliverables. */
+  deliverablesLabel?: string;
+  /** Proposed financial figures + framing prose (Dunkin capstone). */
+  financials?: Financials;
+  /** NON-EDITABLE projection disclaimer rendered beside the financial figures. */
+  financialsNote?: string;
+  /** Success-metrics block — what the campaign would measure (Dunkin). */
+  successMetrics?: BulletBlock;
   /** Throwback's community-partnership block. */
   localMarketing?: BulletBlock;
   /** Section label for the funnel — doc uses "Marketing Funnel" (NB) vs "Customer Journey" (TP). */
@@ -136,63 +162,9 @@ export type CaseStudy = {
   skills?: string[];
 };
 
-/*
-  NOTE: Dunkin Scholarly Study still renders this shared placeholder body — its
-  real content hasn't been supplied yet. The other three studies now carry their
-  own full content transcribed from the client's notes doc. Nothing here was
-  invented; see the doc for the source of every line.
-*/
-const sharedBody = {
-  category: "BRAND IDENTITY & DIGITAL MARKETING",
-  intro:
-    "A full brand identity and marketing campaign for a clean skincare line focused on natural ingredients and self care.",
-  meta: [
-    { key: "client", label: "Client", value: "Natural Beauty Skincare" },
-    {
-      key: "projectType",
-      label: "Project Type",
-      value: "Brand Identity, Packaging, Social Media, Campaign",
-    },
-    {
-      key: "role",
-      label: "Role",
-      value: "Brand Designer, Marketing Strategist, Content Creator",
-    },
-    { key: "timeline", label: "Timeline", value: "Feb 2024 – May 2024 (4 Months)" },
-    {
-      key: "tools",
-      label: "Tools Used",
-      value: "Illustrator, Photoshop, Canva, Meta Business Suite",
-    },
-  ] satisfies MetaItem[],
-  strategy: [
-    "Develop a minimal, nature-inspired brand identity",
-    "Use soft, earthy tones and modern typography",
-    "Educate and build trust through ingredient-led content",
-    "Leverage user-generated content and reviews",
-    "Build a consistent posting schedule across feeds, Reels, and Stories",
-  ],
-  designProcess: ["Mood Board", "Sketches", "Logo Concepts", "Final Brand"],
-  deliverables: [
-    "Primary Logo",
-    "Color Palette",
-    "Social Media Posts",
-    "Packaging",
-  ],
-  campaign: {
-    headline: "YOUR SKIN. OUR NATURE.",
-    sub: "Clean ingredients. Real results.",
-    cta: "SHOP NOW",
-  },
-  results: [
-    { value: "+215%", label: "Instagram Followers" },
-    { value: "+180%", label: "Engagement" },
-    { value: "+68%", label: "Website Clicks" },
-    { value: "+42%", label: "Online Sales" },
-  ] satisfies Stat[],
-  reflection:
-    "This project strengthened my ability to build a brand from the ground up and create a cohesive strategy that connects visuals, messaging, and marketing. I would love to continue testing new content formats and expanding influencer collaborations in the future.",
-};
+/* All four case studies now carry their own content, transcribed from the
+   client's notes docs — the old shared placeholder body has been retired.
+   Nothing here is invented; see the docs for the source of every line. */
 
 /** Shared 4-step design process — the notes doc supplies no process steps, so
  *  every study keeps the existing slots (photos stay editable per project). */
@@ -893,18 +865,190 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     slug: "dunkin-scholarly-study",
-    title: "Dunkin Scholarly Study",
-    cardTagline: "Branding and marketing goals for established businesses.",
+    title: "Dunkin' Low-Calorie Mocha RTD",
+    cardTagline: "A proposed RTD coffee launch — graduate capstone campaign",
     image: "/images/dunkin.jpg",
-    ...sharedBody,
-    // Rich template STRUCTURE, but no reference sheet was supplied — so no accent
-    // palette and no fonts. Stays on the site's default DESIGN_TOKENS.md tokens
-    // (RichCaseStudy falls back to them when `theme` is absent), the palette +
-    // typography blocks hide cleanly, and the results caption is a flagged
-    // placeholder. Not covered by the notes doc — content untouched until the
-    // client supplies it.
+    // ACADEMIC CAPSTONE — a proposed, hypothetical product, NOT a real Dunkin'
+    // campaign, launch, or client engagement. Every figure below is a projection
+    // from the capstone's own financial model, never an achieved result. The
+    // capstone framing is carried in FOUR visible places so it survives editing:
+    // the category eyebrow, the At-a-glance Client row, the non-editable
+    // `financialsNote`, the non-editable `resultsNote` — plus the Results copy
+    // itself. Do not attach Dunkin' logos/trademarks: no official brand asset is
+    // used or recreated anywhere on this page (the hero is a generic desk photo).
+    //
+    // No accent palette or fonts — no reference sheet was supplied, so the page
+    // stays on the site's default DESIGN_TOKENS.md tokens (RichCaseStudy falls
+    // back to them when `theme` is absent) and the Visual identity block hides.
+    // Content transcribed verbatim from the client's capstone notes; nothing
+    // invented. Sections the notes don't cover are simply absent (see below).
     template: "rich",
-    resultsCaption: "*Projections based on a 3-month campaign strategy",
+    category: "INTEGRATED MARKETING CAMPAIGN | MASTER'S CAPSTONE",
+    intro:
+      "Dunkin' is well known for convenient coffee at an affordable price, but its ready-to-drink (RTD) lineup lacked an option for consumers looking for a lower-calorie indulgence. This project proposed a new Low-Calorie Mocha Ready-to-Drink Coffee designed to attract younger, health-conscious consumers while expanding Dunkin's presence in the rapidly growing RTD coffee market.\n\nThe project combined consumer research, product positioning, financial forecasting, branding, and an integrated marketing campaign to create a launch strategy that aligned with Dunkin's brand while appealing to changing consumer preferences.",
+    // No Timeline row — the notes give no dates, so the row is omitted entirely
+    // rather than shown empty (AtAGlanceCard renders only the declared keys).
+    meta: [
+      { key: "client", label: "Client", value: "Dunkin' (academic concept project — not a client engagement)" },
+      { key: "projectType", label: "Project Type", value: "New Product Launch — Integrated Marketing Campaign" },
+      { key: "role", label: "Role", value: "Sole researcher, strategist & creative director" },
+      { key: "tools", label: "Tools Used", value: "Adobe Creative Suite, Canva" },
+    ],
+    strategy: [], // superseded by the positioning/pillars block below
+    designProcess: [], // notes supply no process steps → Process section hides
+    deliverables: [], // superseded by deliverableGroups (the campaign channels)
+    challenge: {
+      // Prose-only in the notes — no bullets, so this renders as two paragraphs.
+      intro:
+        "Consumers increasingly want products that balance convenience, taste, and healthier nutrition. While premium coffee brands offered lighter options, Dunkin had an opportunity to introduce a lower-calorie mocha beverage that maintained its approachable, everyday brand personality.",
+      items: [],
+      outro:
+        "The challenge was to create a campaign that positioned the drink as an indulgent coffee without the guilt while differentiating it from competitors in a crowded RTD market.",
+    },
+    objectives: {
+      items: [
+        "Launch a new low-calorie RTD coffee product",
+        "Increase awareness among Gen Z and Millennials",
+        "Position Dunkin as both convenient and health-conscious",
+        "Expand Dunkin's presence in the RTD beverage category",
+        "Create a scalable international marketing strategy",
+      ],
+    },
+    audience: {
+      primaryIntro:
+        "Health-conscious consumers ages 18–34 who enjoy coffee but seek lower-calorie alternatives without sacrificing flavor.",
+      primary: [
+        "Busy professionals",
+        "College students",
+        "Fitness-minded consumers",
+        "On-the-go lifestyles",
+        "Heavy social media users",
+        "Value convenience and affordability",
+      ],
+    },
+    role: {
+      intro:
+        "For this graduate capstone project, I developed every aspect of the campaign, including:",
+      items: [
+        "Consumer research",
+        "Market analysis",
+        "Competitive analysis",
+        "Product positioning",
+        "Pricing strategy",
+        "Financial projections",
+        "Integrated marketing campaign",
+        "Social media strategy",
+        "Launch plan",
+        "Creative direction",
+        "Performance metrics",
+      ],
+    },
+    pillarsLabel: "Strategy",
+    positioning: "Rich mocha flavor. Fewer calories. Same Dunkin' convenience.",
+    pillarsIntro:
+      "Rather than marketing the beverage as a “diet coffee,” I positioned it as an everyday indulgence. The campaign focused on three core messages:",
+    pillars: [
+      { title: "Better-for-you choice" },
+      { title: "Convenient grab-and-go coffee" },
+      { title: "Affordable premium flavor" },
+    ],
+    pillarsOutro:
+      "This positioning allowed Dunkin to compete with premium RTD brands while remaining accessible to its core audience.",
+    creative: {
+      intro: "The campaign emphasized:",
+      items: [
+        "Bright Dunkin orange and pink branding",
+        "Clean product photography",
+        "Active lifestyle imagery",
+        "Modern typography",
+        "Bold calls-to-action",
+        "Mobile-first content",
+      ],
+      outro:
+        "The overall creative balanced Dunkin's energetic personality with a cleaner, wellness-focused aesthetic.",
+    },
+    deliverablesLabel: "Marketing campaign",
+    deliverableGroups: [
+      {
+        title: "Social media",
+        items: [
+          "Instagram",
+          "TikTok",
+          "YouTube Shorts",
+          "Influencer collaborations",
+          "UGC challenges",
+        ],
+      },
+      {
+        title: "Digital marketing",
+        items: [
+          "Paid social advertising",
+          "Google Search",
+          "Display advertising",
+          "Email marketing",
+          "Mobile app promotions",
+        ],
+      },
+      {
+        title: "Promotions",
+        items: [
+          "Product sampling",
+          "Retail displays",
+          "Limited-time launch offers",
+          "Loyalty rewards through the Dunkin app",
+        ],
+      },
+    ],
+    financials: {
+      intro:
+        "The proposed pricing strategy positioned the beverage competitively within the RTD coffee market.",
+      figures: [
+        { label: "Retail Price", value: "$2.99" },
+        { label: "Wholesale Price", value: "$1.95" },
+        { label: "Estimated Year 1 Sales", value: "65M units" },
+        { label: "Marketing Investment", value: "$18M" },
+        { label: "Break-even Point", value: "32.7M units" },
+      ],
+      outro:
+        "These projections demonstrated the product's long-term growth potential while supporting a realistic launch strategy.",
+    },
+    financialsNote: "Proposed projections — not achieved results",
+    successMetrics: {
+      intro: "The campaign measured success through:",
+      items: [
+        "Product sales",
+        "Brand awareness",
+        "Social engagement",
+        "Influencer reach",
+        "Website traffic",
+        "App downloads",
+        "Repeat purchases",
+        "ROI",
+        "Market share growth",
+      ],
+    },
+    // The notes' Results section is prose with no figures — so no stat cards.
+    results: [],
+    resultsNote: "Academic capstone — proposed campaign, not a live launch",
+    resultsIntro:
+      "Although developed as a graduate capstone project, the campaign demonstrated how research-driven strategy could support a realistic product launch for a nationally recognized brand.\n\nThe final deliverables presented a cohesive launch plan that integrated consumer insights, financial forecasting, creative design, and digital marketing into one unified campaign.",
+    resultsCaption: "",
+    reflection: "", // notes have no "What I learned" section → it hides
+    skills: [
+      "Marketing Strategy",
+      "Brand Positioning",
+      "Consumer Research",
+      "Competitive Analysis",
+      "Integrated Marketing Communications",
+      "Social Media Marketing",
+      "Campaign Planning",
+      "Product Marketing",
+      "Financial Analysis",
+      "Creative Direction",
+      "Adobe Creative Suite",
+      "Canva",
+      "Presentation Design",
+    ],
   },
 ];
 

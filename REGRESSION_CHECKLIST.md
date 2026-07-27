@@ -68,10 +68,12 @@ enough — content can exist in the DOM but be invisible (e.g. stuck at
 and `PlainCaseStudy.tsx` deleted). the-perfected-flower / natural-beauty /
 throwback-pizza use their accent palettes; dunkin-scholarly-study stays on the
 default DESIGN_TOKENS.md tokens.
-- [ ] All 4 render: At-a-glance sidebar card, strategy list, process step row
-      (horizontal ≥768px / stacked mobile), deliverables checklist (✓), dark
-      campaign spotlight, 4 icon stat cards + caption, reflection — fully
-      populated, nothing lost vs the old template
+- [ ] All 4 render: At-a-glance sidebar card, dark campaign spotlight, and the
+      sections their own notes supply — fully populated, nothing lost vs the old
+      template. NB / Throwback / Perfected Flower additionally show the process
+      step row (horizontal ≥768px / stacked mobile), deliverables checklist (✓),
+      stat cards + caption and reflection; **Dunkin legitimately has none of
+      those four** (see its own block below) — that is correct, not a regression
 
 ### Extended sections (doc-sourced content — NB / Throwback / Perfected Flower)
 - [ ] **Section order** matches: header → Challenge → Objectives → Audience +
@@ -82,9 +84,35 @@ default DESIGN_TOKENS.md tokens.
 - [ ] **Background alternation is computed from VISIBLE sections**, not
       hardcoded — no two adjacent sections share the same tint/card color on
       ANY of the 4 pages, regardless of how many optional sections a study has
-- [ ] **Dunkin renders unchanged**: same section set, same content, same
-      template as before this work — it has none of the 10 new sections and is
-      not in the notes doc
+- [ ] **Dunkin is now fully populated from its own capstone notes** (it is NOT
+      the empty-state case any more). 13 sections in this order: header →
+      Skills → Challenge → Objectives → Target audience → My role → Strategy →
+      Creative direction → Marketing campaign → Campaign spotlight → Financial
+      highlights → Success metrics → Results. Stays on the DEFAULT tokens (no
+      accent palette/fonts) and still color-customizable in edit mode
+- [ ] **Dunkin is the empty-state proof for the ALWAYS-ON sections**: Process,
+      Results stat cards, the results caption, and What I learned all hide
+      cleanly when the source has no content — no empty heading, no blank
+      padded band, no stray grid margin. (Its notes supply no process steps, no
+      results figures and no reflection.) Visual identity, Content mix, Funnel,
+      Metrics table, Persona and Key takeaways hide as before
+- [ ] **Dunkin capstone/projection framing is VISIBLE and partly non-editable** —
+      regression here is a factual-accuracy bug, not cosmetic:
+      - category eyebrow reads `INTEGRATED MARKETING CAMPAIGN | MASTER'S CAPSTONE`
+      - At-a-glance Client row says `academic concept project — not a client engagement`
+      - `Proposed projections — not achieved results` sits beside the Financial
+        highlights heading and is **not** an editable Field (like metricsNote)
+      - `Academic capstone — proposed campaign, not a live launch` sits beside
+        the Results heading and is **not** editable
+      - **No Dunkin' logo, wordmark or brand asset anywhere** — the hero is a
+        generic desk photo; never source or recreate one
+- [ ] **Dunkin At-a-glance shows 4 rows, no Timeline** — the notes give no
+      dates, so the row is omitted entirely rather than rendered empty
+      (`AtAGlanceCard` renders only the keys a study declares; the other three
+      studies still show all 5 rows)
+- [ ] **Financial highlights are CARDS, never a table** — 5 figures ($2.99 /
+      $1.95 / 65M units / $18M / 32.7M units) in a 1-col → 2-col → 3-col grid;
+      verify **zero horizontal overflow at 375px**, which a real table caused
 - [ ] **The Perfected Flower is the empty-state proof**: Target audience,
       Persona, Brand pillars, photography-in-visual-identity, Deliverables,
       Local marketing, Marketing funnel, and Sample performance metrics ALL
@@ -107,8 +135,10 @@ default DESIGN_TOKENS.md tokens.
       `lg`, all five the same pixel width; 2-up at `md` with the 5th centered;
       single stacked column on mobile
 - [ ] **Deliverables — grouped mode**: NB (3 groups/13 items) and Throwback (3
-      groups/16 items) render subheadings per group; flat/ungrouped mode still
-      works unchanged for Dunkin
+      groups/16 items) render subheadings per group under the "Deliverables"
+      label; Dunkin reuses the same grouped component for its campaign channels
+      (3 groups/14 items) but relabels the section **"Marketing campaign"** via
+      `deliverablesLabel` — the default label must stay "Deliverables"
 - [ ] **Content mix bars**: bar widths are proportional to each category's
       `percent` and the set sums to 100% per study (NB/PF 40/30/20/10,
       Throwback 30/30/20/20) — CSS-only, no charting library

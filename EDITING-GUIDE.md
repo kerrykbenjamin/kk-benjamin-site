@@ -52,6 +52,25 @@ same dashed outline and pencil. A few small things stay fixed on purpose:
 Each project only shows the sections it has content for — if a project has no
 metrics table or persona, that section simply isn't there, and that's normal.
 
+**The Dunkin' project has a few sections the others don't**, because it's a
+school capstone rather than client work: *My role*, *Creative direction*,
+*Financial highlights*, and *Success metrics*. They edit exactly like every
+other section. Two things there are **fixed on purpose and can't be edited or
+removed**, because they keep the page honest about what the project is:
+
+- the small italic **"Proposed projections — not achieved results"** next to
+  the Financial highlights heading, and
+- the **"Academic capstone — proposed campaign, not a live launch"** note next
+  to Results.
+
+The same goes for the *"academic concept project"* wording in the At a glance
+box and the *"Master's Capstone"* line under the photo — those two **are**
+editable text, but please keep the meaning: the page must stay clear that this
+was a proposed student project, not a real Dunkin' campaign. For the same
+reason the page uses a plain desk photo rather than any Dunkin' logo — if you
+ever want real Dunkin' branding on it, that's an image you'd need to obtain and
+have permission to use.
+
 ## 4. Change a photo
 
 1. Tap the **“Change photo”** button on any picture.

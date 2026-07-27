@@ -32,7 +32,9 @@ export default function CaseBulletList({
   /** 2 = md two-column grid for long lists (still one column at 375px). */
   columns?: 1 | 2;
 }) {
-  if (count === 0) return null;
+  // Prose-only blocks are legitimate (Dunkin's Challenge is two paragraphs with
+  // no bullets), so only bail when there is genuinely nothing to render.
+  if (count === 0 && !hasHeading && !hasIntro && !hasOutro && !hasQuote) return null;
   return (
     <div className="max-w-3xl">
       {hasHeading && (
@@ -49,17 +51,19 @@ export default function CaseBulletList({
           className="mt-6 whitespace-pre-line text-lead text-[var(--cs-text,#1F2A19)]/75"
         />
       )}
-      <ul className={`mt-6 grid gap-3.5 ${columns === 2 ? "md:grid-cols-2" : ""}`}>
-        {Array.from({ length: count }, (_, i) => (
-          <li key={i} className="flex gap-3 text-[var(--cs-text,#1F2A19)]/80">
-            <span
-              aria-hidden
-              className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--cs-accent,#6F8B5F)]"
-            />
-            <Field id={`case.${slug}.${name}.${i + 1}`} as="span" />
-          </li>
-        ))}
-      </ul>
+      {count > 0 && (
+        <ul className={`mt-6 grid gap-3.5 ${columns === 2 ? "md:grid-cols-2" : ""}`}>
+          {Array.from({ length: count }, (_, i) => (
+            <li key={i} className="flex gap-3 text-[var(--cs-text,#1F2A19)]/80">
+              <span
+                aria-hidden
+                className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--cs-accent,#6F8B5F)]"
+              />
+              <Field id={`case.${slug}.${name}.${i + 1}`} as="span" />
+            </li>
+          ))}
+        </ul>
+      )}
       {hasOutro && (
         <Field
           id={`case.${slug}.${name}.outro`}

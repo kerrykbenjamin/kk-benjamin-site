@@ -14,11 +14,14 @@ export default function BrandPillars({
   slug,
   positioning,
   hasIntro,
+  hasOutro = false,
   pillars,
 }: {
   slug: string;
   positioning?: string;
   hasIntro: boolean;
+  /** Closing line beneath the pillars (Dunkin's positioning rationale). */
+  hasOutro?: boolean;
   pillars?: Pillar[];
 }) {
   const withDesc = (pillars ?? []).some((p) => p.description);
@@ -77,6 +80,13 @@ export default function BrandPillars({
             ))}
           </ul>
         )
+      )}
+      {hasOutro && (
+        <Field
+          id={`case.${slug}.pillars.outro`}
+          as="p"
+          className="mt-8 max-w-3xl whitespace-pre-line text-[var(--cs-text,#1F2A19)]/75"
+        />
       )}
     </div>
   );

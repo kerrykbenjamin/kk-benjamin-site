@@ -51,7 +51,7 @@ const MAX = {
   h2: 80,
   h3: 45,
   lead: 220,
-  body: 600, // multi-paragraph blocks (intro/reflection/persona) — wraps, never truncates
+  body: 700, // multi-paragraph blocks (intro/reflection/persona) — wraps, never truncates
   tagline: 80,
   quote: 280,
   bullet: 110,
@@ -65,7 +65,9 @@ const MAX = {
   name: 60,
   caption: 120, // centered results caption — fits one/two lines at 375px
   role: 24, // font role ("Headline" / "Body")
-  item: 36, // checklist/chip items that run longer than MAX.chip ("Google Business Profile Assets")
+  item: 44, // checklist/chip items that run longer than MAX.chip ("Loyalty rewards through the Dunkin app")
+  finValue: 14, // financial figure ("32.7M units") — one line inside its card
+  finLabel: 34, // financial figure label ("Estimated Year 1 Sales")
   pillarDesc: 180, // one-to-two sentence pillar description
   metricLabel: 40, // metrics-table row label ("Average Monthly Website Visitors")
   metricValue: 16, // metrics-table cell ("19,400/month")
@@ -302,13 +304,33 @@ for (const cs of caseStudies) {
 
   block("challenge", "challenge", cs.challenge);
   block("objectives", "objective", cs.objectives);
+  block("role", "role", cs.role);
+  block("creative", "creative direction", cs.creative);
+  block("metricslist", "success metric", cs.successMetrics);
   block("local", "local marketing", cs.localMarketing);
   block("outcomes", "outcome", cs.resultsOutcomes);
   block("takeaways", "takeaway", cs.takeaways);
 
+  // Financial highlights (Dunkin). `financialsNote` is deliberately NOT
+  // registered — the "proposed projections, not achieved results" disclaimer
+  // must not be editable away, matching metricsNote/resultsNote.
+  if (cs.financials) {
+    if (cs.financials.intro)
+      fields.push(t(k("financials.intro"), p, `${cs.title} — financials intro`, MAX.body, cs.financials.intro, true));
+    cs.financials.figures.forEach((f, i) => {
+      const n = i + 1;
+      fields.push(
+        t(k(`fin.${n}.label`), p, `${cs.title} — figure ${n} label`, MAX.finLabel, f.label),
+        t(k(`fin.${n}.value`), p, `${cs.title} — figure ${n} value`, MAX.finValue, f.value),
+      );
+    });
+    if (cs.financials.outro)
+      fields.push(t(k("financials.outro"), p, `${cs.title} — financials closing`, MAX.body, cs.financials.outro, true));
+  }
+
   if (cs.audience) {
     if (cs.audience.primaryIntro)
-      fields.push(t(k("audience.intro"), p, `${cs.title} — audience intro`, MAX.short, cs.audience.primaryIntro));
+      fields.push(t(k("audience.intro"), p, `${cs.title} — audience intro`, MAX.lead, cs.audience.primaryIntro));
     cs.audience.primary.forEach((s, i) =>
       fields.push(t(k(`audience.${i + 1}`), p, `${cs.title} — audience ${i + 1}`, MAX.bullet, s)),
     );
@@ -331,6 +353,8 @@ for (const cs of caseStudies) {
     if (pl.description)
       fields.push(t(k(`pillar.${n}.desc`), p, `${cs.title} — pillar ${n} description`, MAX.pillarDesc, pl.description, true));
   });
+  if (cs.pillarsOutro)
+    fields.push(t(k("pillars.outro"), p, `${cs.title} — pillars closing`, MAX.body, cs.pillarsOutro, true));
   (cs.photography ?? []).forEach((s, i) =>
     fields.push(t(k(`photography.${i + 1}`), p, `${cs.title} — photography style ${i + 1}`, MAX.bullet, s)),
   );
