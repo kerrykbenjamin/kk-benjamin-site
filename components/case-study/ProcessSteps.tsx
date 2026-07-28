@@ -73,7 +73,7 @@ export default async function ProcessSteps({
               alt={`${labels[i]} photo`}
               mode="show"
               tone="light"
-              lightbox={`case:${slug}`}
+              lightbox={`case:${slug}:process`}
               placeholder={
                 <ProcessStepPlaceholder
                   icon={STEP_ICONS[i % STEP_ICONS.length]}

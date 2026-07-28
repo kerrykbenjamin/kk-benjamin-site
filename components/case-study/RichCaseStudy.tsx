@@ -126,7 +126,7 @@ export default async function RichCaseStudy({
                 priority
                 sizes="(max-width: 1024px) 100vw, 60vw"
                 className="object-cover"
-                lightbox={`case:${slug}`}
+                lightbox={`case:${slug}:hero`}
               />
             </div>
           </Reveal>

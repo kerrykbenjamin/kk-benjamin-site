@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { openLightbox } from "./lightbox-bus";
+import { openLightbox, type LightboxItem } from "./lightbox-bus";
 
 /**
  * Click-to-enlarge wrapper around a content image. Renders a focusable
@@ -24,6 +24,8 @@ export default function LightboxImage({
   className = "",
   priority = false,
   caption,
+  items,
+  index,
 }: {
   group: string;
   src: string;
@@ -34,6 +36,13 @@ export default function LightboxImage({
   /** Optional title/description shown bottom-left INSIDE the lightbox (not on
    *  the page). Used by the portfolio gallery; other groups omit it. */
   caption?: { title?: string; desc?: string };
+  /**
+   * Explicit section set — pass ONLY from a section that virtualizes its items
+   * (the spotlight carousel), where a DOM query would see a partial set. Every
+   * other caller omits these and the overlay derives the set from `group`.
+   */
+  items?: LightboxItem[];
+  index?: number;
 }) {
   return (
     <button
@@ -41,10 +50,16 @@ export default function LightboxImage({
       data-lightbox-group={group}
       data-lightbox-src={src}
       data-lightbox-alt={alt}
+      data-lightbox-kind="image"
       data-lightbox-title={caption?.title || undefined}
       data-lightbox-desc={caption?.desc || undefined}
       aria-label={alt ? `View larger: ${alt}` : "View larger image"}
-      onClick={(e) => openLightbox(e.currentTarget)}
+      onClick={(e) =>
+        openLightbox(
+          e.currentTarget,
+          items ? { items, index: index ?? 0 } : undefined,
+        )
+      }
       className="absolute inset-0 block h-full w-full cursor-zoom-in rounded-[inherit] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage"
     >
       <Image src={src} alt={alt} fill sizes={sizes} className={className} priority={priority} />

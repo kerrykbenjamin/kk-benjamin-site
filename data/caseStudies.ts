@@ -877,12 +877,24 @@ export const caseStudies: CaseStudy[] = [
     // itself. Do not attach Dunkin' logos/trademarks: no official brand asset is
     // used or recreated anywhere on this page (the hero is a generic desk photo).
     //
-    // No accent palette or fonts — no reference sheet was supplied, so the page
-    // stays on the site's default DESIGN_TOKENS.md tokens (RichCaseStudy falls
-    // back to them when `theme` is absent) and the Visual identity block hides.
-    // Content transcribed verbatim from the client's capstone notes; nothing
-    // invented. Sections the notes don't cover are simply absent (see below).
+    // Warm amber/rose CONCEPT theme (CASE_STUDY_PALETTES.md → Dunkin). No
+    // reference sheet exists for this project, so these are complementary tones
+    // chosen to evoke the notes' "bright orange and pink" creative direction —
+    // deliberately NOT Dunkin's trademarked brand colors, and never presented
+    // as such. No literal `palette` swatch row is declared: publishing a "brand
+    // palette" for a brand she doesn't own would overstate the project, and the
+    // notes supply none — so the Visual identity block stays hidden. `fonts` is
+    // likewise absent. Content transcribed verbatim from the capstone notes;
+    // nothing invented. Sections the notes don't cover are simply absent.
     template: "rich",
+    theme: {
+      tint: "#F9EEE2", // amber mixed 93% into site cream
+      card: "#FAE8D7", // peach mixed 50% into site ivory
+      accent: "#E2711D", // amber — DECORATIVE ONLY (2.78:1 as text, fails AA)
+      text: "#3B2A22", // espresso — 11.92:1 on tint
+      dark: "#3B2A22",
+      onDark: "#FBF1E4", // warm cream — 12.21:1 on espresso
+    },
     category: "INTEGRATED MARKETING CAMPAIGN | MASTER'S CAPSTONE",
     intro:
       "Dunkin' is well known for convenient coffee at an affordable price, but its ready-to-drink (RTD) lineup lacked an option for consumers looking for a lower-calorie indulgence. This project proposed a new Low-Calorie Mocha Ready-to-Drink Coffee designed to attract younger, health-conscious consumers while expanding Dunkin's presence in the rapidly growing RTD coffee market.\n\nThe project combined consumer research, product positioning, financial forecasting, branding, and an integrated marketing campaign to create a launch strategy that aligned with Dunkin's brand while appealing to changing consumer preferences.",

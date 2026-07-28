@@ -184,12 +184,16 @@ fields.push(
 );
 // Gallery tiles — one image + optional caption pair per slot, derived from the
 // data list so raising GALLERY_SLOT_COUNT automatically registers new fields.
-// Images are `square` (uploads center-crop to 1:1, matching the square tiles).
+// Deliberately NOT `square`: the tiles letterbox the whole photo
+// (`object-contain`), so a center-crop on upload would permanently destroy the
+// parts of a portrait/landscape shot the tile is now able to show. Uploads keep
+// the original framing, just resized down + WebP-compressed like every other
+// non-square field.
 portfolioIllustrations.forEach((il) => {
   fields.push(
     t(`portfolio.illus.${il.n}.title`, "portfolio", `Gallery tile ${il.n} — title`, MAX.h3, il.defaultTitle),
     t(`portfolio.illus.${il.n}.tagline`, "portfolio", `Gallery tile ${il.n} — tagline`, MAX.tagline, il.defaultTagline),
-    { ...img(`portfolio.illus.${il.n}.image`, "portfolio", `Gallery tile ${il.n} — image`, il.defaultImage), square: true },
+    img(`portfolio.illus.${il.n}.image`, "portfolio", `Gallery tile ${il.n} — image`, il.defaultImage),
   );
 });
 

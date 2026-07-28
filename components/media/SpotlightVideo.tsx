@@ -34,6 +34,7 @@ export default function SpotlightVideo({
   alt,
   active = true,
   onHoldChange,
+  onExpand,
 }: {
   src: string;
   poster?: string;
@@ -42,6 +43,14 @@ export default function SpotlightVideo({
   active?: boolean;
   /** Carousel hook: true while auto-advance should wait for this video. */
   onHoldChange?: (hold: boolean) => void;
+  /**
+   * Visitor click-to-enlarge. When set, the whole video surface becomes a
+   * zoom target that opens the lightbox (where the clip gets FULL native
+   * controls). The inline play/pause + mute buttons sit above it and keep
+   * working, so both interactions coexist. Omitted in edit mode, where the
+   * change-media flow owns the click instead.
+   */
+  onExpand?: () => void;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -126,7 +135,7 @@ export default function SpotlightVideo({
   }
 
   const btn =
-    "pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full " +
+    "pointer-events-auto relative z-20 flex h-11 w-11 items-center justify-center rounded-full " +
     "bg-[var(--cs-dark,#182312)]/75 text-[var(--cs-on-dark,#FBF7F1)] backdrop-blur-sm " +
     "transition-colors hover:bg-[var(--cs-dark,#182312)] " +
     "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cs-on-dark,#FBF7F1)]";
@@ -170,13 +179,25 @@ export default function SpotlightVideo({
         }}
       />
 
+      {/* Click-to-enlarge surface. Sits ABOVE the <video> but BELOW the inline
+          controls (z-20), so tapping the picture opens the viewer while the
+          play/pause and mute buttons still take their own clicks. */}
+      {onExpand && (
+        <button
+          type="button"
+          onClick={onExpand}
+          aria-label={alt ? `View larger: ${alt}` : "View larger video"}
+          className="absolute inset-0 z-10 h-full w-full cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-[var(--cs-on-dark,#FBF7F1)]"
+        />
+      )}
+
       {/* Reduced-motion (or not-yet-started) state: prominent centered play */}
       {!playing && (
         <button
           type="button"
           onClick={togglePlay}
           aria-label="Play video"
-          className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--cs-dark,#182312)]/75 text-[var(--cs-on-dark,#FBF7F1)] backdrop-blur-sm transition-colors hover:bg-[var(--cs-dark,#182312)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cs-on-dark,#FBF7F1)]"
+          className="absolute left-1/2 top-1/2 z-20 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--cs-dark,#182312)]/75 text-[var(--cs-on-dark,#FBF7F1)] backdrop-blur-sm transition-colors hover:bg-[var(--cs-dark,#182312)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cs-on-dark,#FBF7F1)]"
         >
           <svg aria-hidden viewBox="0 0 24 24" className="ml-0.5 h-6 w-6 fill-current">
             <path d="M8 5.5v13l11-6.5-11-6.5Z" />

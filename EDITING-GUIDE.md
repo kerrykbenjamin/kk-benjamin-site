@@ -102,11 +102,17 @@ photo on purpose:
   usual pencil; tiles without a caption just show the photo, no empty box.
 
 Tap **“Add photo”** on any of these to fill it (after that it says “Change
-photo” like the rest). Two things to know about the Process photos:
+photo” like the rest). Things to know:
 
-- **They're square.** Whatever you upload is automatically trimmed to a neat
-  square from the middle of the picture — so roughly-square photos work best,
-  and nothing ever comes out stretched or squished.
+- **Gallery photos are never cropped.** Upload any shape — tall, wide, or
+  square — and the *whole* picture is shown, sitting inside a neat square tile
+  with a soft cream border filling the leftover space. All the tiles stay the
+  same size, so the grid still looks tidy. (Older gallery photos you uploaded
+  before this change were trimmed to a square at the time; re-upload one if
+  you'd like to see all of it again.)
+- **Process photos are square.** Unlike the gallery, these are still trimmed to
+  a neat square from the middle of the picture — so roughly-square photos work
+  best there, and nothing ever comes out stretched or squished.
 - **You can swap, not remove.** Once a spot has a real photo you can replace it
   with a different one any time, but there's no way to take it back to the
   placeholder tile — so add photos when you have ones you like.
@@ -211,12 +217,25 @@ ask your developer if you want them changed.
 ### Good to know
 
 - **Your changes are live within a few seconds** for everyone who visits.
-- **Anyone can tap a photo to view it larger** — one photo at a time; close it
-  with the ×, the Esc key, or by tapping the dimmed background. This works for
-  you too while you're just browsing. The moment you tap **"Edit site"**,
-  tapping a photo opens the photo picker instead (the whole photo is the
-  button, not just the little pill), so you can't accidentally trigger an
-  upload while browsing or open the viewer while editing.
+- **Anyone can tap a photo or video to view it larger.** The enlarged view
+  shows the *whole* thing — never cropped — and you can move through the other
+  items **in that same group** with the ‹ › arrows, the left/right arrow keys,
+  or by swiping on a phone. A small counter (like *2 / 5*) shows where you are.
+  Groups don't mix: from a gallery photo you scroll through the gallery, from a
+  campaign slideshow item you scroll through that project's slideshow, and a
+  single photo on its own (like a project's main picture) just opens with no
+  arrows at all. Close with the ×, the Esc key, or by tapping the dimmed
+  background.
+- **Videos open large too.** Tapping a campaign video opens it big and centered
+  with the **full player controls** — play/pause, a scrubber to jump around,
+  volume and mute, and fullscreen — unlike the small silent preview that loops
+  on the page. Moving to another item (or closing) stops it automatically, so
+  only the one you're looking at ever plays. The little play and mute buttons
+  on the page preview still work as before.
+- The moment you tap **"Edit site"**, tapping a photo or video opens the
+  picker instead (the whole item is the button, not just the little pill), so
+  you can't accidentally trigger an upload while browsing or open the viewer
+  while editing.
 - If something can't be saved, you'll see a little message at the top explaining
   why (for example, text that's too long, or an empty box).
 - You can change **words, photos, colors, and the order of cards** — but not

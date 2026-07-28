@@ -7,9 +7,11 @@ approximated from memory) — see `scripts/sample-palette.mjs` /
 footer, nav, `Container`, global typography) stays on `DESIGN_TOKENS.md` tokens
 on every page, unaffected by any of this.
 
-**Dunkin Scholarly Study has no reference sheet and is intentionally left on the
-site's default palette — flagging back per the brief. Supply a reference sheet
-if you'd like it themed too.**
+**Dunkin is the one exception to "sampled from a reference sheet":** no
+reference sheet or capstone artwork exists for it, so its palette is a
+*concept* palette chosen to match the notes' stated creative direction rather
+than sampled. See its section below — including why it deliberately does **not**
+reproduce Dunkin's real brand colors and declares no literal swatch row.
 
 ## How each project maps to UI roles
 
@@ -120,6 +122,55 @@ icon/spotlight surface. The **literal** `#846937` is preserved unmodified in the
 "Brand palette" swatch display, since that IS real brand content and shouldn't
 be altered. Pink and Orange measured 2.3–3.0:1 and are decorative-only for the
 same reason as Natural Beauty's Sage and Throwback Pizza's Teal.
+
+---
+
+## Dunkin' Low-Calorie Mocha RTD (capstone)
+
+**Not sampled — a concept palette, and deliberately not the real brand's.**
+This project is a graduate capstone for a *proposed, hypothetical* product; it
+is not client work and carries no reference sheet or uploaded artwork to sample
+(the hero is a generic desk photo). The notes' Creative direction section asks
+for "bright Dunkin orange and pink branding", so the palette below evokes that
+warmth with **independent, complementary tones**.
+
+It intentionally does **not** reproduce Dunkin's trademarked colors — their
+orange `#FF6E0C` and magenta `#DA1884` — and must not be relabeled as Dunkin's
+official palette. Reproducing a real company's brand colors and presenting them
+as its identity would undercut the capstone framing the rest of the page works
+to preserve.
+
+| Swatch (concept) | Hex |
+|---|---|
+| Amber Orange | `#E2711D` |
+| Dusty Rose | `#D46A8C` |
+| Warm Cream | `#FBF1E4` |
+| Light Peach | `#F5D5BA` |
+| Espresso | `#3B2A22` |
+
+**UI theme:**
+| Role | Hex | Source |
+|---|---|---|
+| `tint` | `#F9EEE2` | Amber mixed 93% into site cream |
+| `card` | `#FAE8D7` | Light Peach mixed 50% into site ivory |
+| `accent` | `#E2711D` | Amber Orange — decorative only |
+| `text` | `#3B2A22` | Espresso |
+| `dark` | `#3B2A22` | Espresso |
+| `onDark` | `#FBF1E4` | Warm Cream |
+
+Contrast: Espresso/tint **11.92:1** · Espresso/card **11.42:1** · Warm
+Cream/Espresso (dark surface) **12.21:1** — all pass AA with a wide margin.
+Amber measured **2.78:1 as text / 3.18:1 against a white icon** and Dusty Rose
+**2.94:1 / 3.37:1**; both are below the 4.5:1 text threshold, so — exactly as
+with Natural Beauty's Sage and Throwback Pizza's Teal — they are demoted to
+**decorative-only** (connector lines, ring borders, bullet dots) and never carry
+text or icon strokes.
+
+**No literal swatch row is rendered on the page.** Unlike the other three, this
+study declares no `palette` in `data/caseStudies.ts`, so the "Visual identity"
+section stays hidden: the notes supply no palette, and publishing a "Brand
+palette" for a company she doesn't own would overstate the project. These hexes
+exist only as the page's UI theme.
 
 ---
 

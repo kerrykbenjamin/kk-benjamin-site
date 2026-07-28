@@ -13,9 +13,19 @@ import {
 import EditableImageSlot from "@/components/edit/EditableImageSlot";
 import SlotPlaceholder from "@/components/edit/SlotPlaceholder";
 import LightboxImage from "@/components/lightbox/LightboxImage";
+import { openLightbox, type LightboxItem } from "@/components/lightbox/lightbox-bus";
 import SpotlightVideo from "./SpotlightVideo";
 import SpotlightGif from "./SpotlightGif";
 import { mediaKindFromUrl } from "@/lib/media";
+
+/**
+ * Lightbox group for a study's spotlight. Deliberately DISTINCT from the hero
+ * (`case:<slug>:hero`) and the process photos (`case:<slug>:process`) so the
+ * viewer's next/prev can never walk out of the spotlight into another section.
+ */
+export function spotlightGroup(slug: string) {
+  return `case:${slug}:spotlight`;
+}
 
 /**
  * Campaign-spotlight carousel — the ONE-at-a-time featured media area inside
@@ -91,6 +101,23 @@ export default function SpotlightCarousel({
 }) {
   const deck = editMode ? slides : slides.filter((s) => s.src);
   const count = deck.length;
+
+  // The viewer's set for this section. Built from the WHOLE deck, not from
+  // what is currently mounted — the lazy window only ever renders the active
+  // slide + the next one, so a DOM-derived set would show "2" for a 6-slide
+  // spotlight. Photos, GIFs and videos all appear here, in deck order, so
+  // paging in the viewer moves across mixed media seamlessly.
+  const viewerItems: LightboxItem[] = deck
+    .filter((s) => s.src)
+    .map((s) => ({
+      src: s.src,
+      alt: `Campaign media ${s.n}`,
+      kind: mediaKindFromUrl(s.src) === "video" ? ("video" as const) : ("image" as const),
+      poster: s.poster || undefined,
+    }));
+  /** deck index → index within viewerItems (they differ only in edit mode). */
+  const viewerIndexOf = (deckIdx: number) =>
+    Math.max(0, viewerItems.findIndex((it) => it.src === deck[deckIdx]?.src));
 
   const regionRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -301,7 +328,7 @@ export default function SpotlightCarousel({
                       mode="show"
                       tone="dark"
                       label={`Campaign media ${slide.n}`}
-                      lightbox={`case:${slug}`}
+                      lightbox={spotlightGroup(slug)}
                       wrapperClassName="relative h-full w-full overflow-hidden rounded-[12px]"
                       mediaCapable
                       poster={slide.poster}
@@ -312,6 +339,8 @@ export default function SpotlightCarousel({
                       slug={slug}
                       mounted={isMounted}
                       active={isActive}
+                      items={viewerItems}
+                      index={viewerIndexOf(i)}
                       onHoldChange={(hold) => {
                         // Only the ACTIVE slide's video may drive the deck hold —
                         // the preloaded next slide (active=false) never plays, so
@@ -393,6 +422,8 @@ function SlideMedia({
   mounted,
   active,
   onHoldChange,
+  items,
+  index,
 }: {
   slide: SpotlightSlide;
   slug: string;
@@ -401,6 +432,9 @@ function SlideMedia({
   active: boolean;
   /** Video hold hook — true while auto-advance should wait for this clip. */
   onHoldChange: (hold: boolean) => void;
+  /** The FULL filled-slide set for the viewer (see note in the parent). */
+  items: LightboxItem[];
+  index: number;
 }) {
   const kind = mediaKindFromUrl(slide.src);
 
@@ -427,6 +461,7 @@ function SlideMedia({
         alt={`Campaign media ${slide.n}`}
         active={active}
         onHoldChange={onHoldChange}
+        onExpand={() => openLightbox(expandAnchor(), { items, index })}
       />
     );
   }
@@ -439,18 +474,32 @@ function SlideMedia({
         alt={`Campaign media ${slide.n}`}
         sizes={SIZES}
         className="object-cover"
-        lightbox={`case:${slug}`}
+        lightbox={spotlightGroup(slug)}
+        items={items}
+        index={index}
       />
     );
   }
 
   return (
     <LightboxImage
-      group={`case:${slug}`}
+      group={spotlightGroup(slug)}
       src={slide.src}
       alt={`Campaign media ${slide.n}`}
       sizes={SIZES}
       className="object-cover"
+      items={items}
+      index={index}
     />
   );
+}
+
+/**
+ * Focus-return target for a video expand. SpotlightVideo's zoom surface is the
+ * currently focused element when it is activated, so hand the viewer that —
+ * falling back to <body> if the click came from a pointer with no focus.
+ */
+function expandAnchor(): HTMLElement {
+  const el = document.activeElement;
+  return el instanceof HTMLElement ? el : document.body;
 }

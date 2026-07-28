@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import LightboxImage from "@/components/lightbox/LightboxImage";
+import type { LightboxItem } from "@/components/lightbox/lightbox-bus";
 
 /**
  * Campaign-spotlight GIF renderer with reduced-motion support.
@@ -25,6 +26,8 @@ export default function SpotlightGif({
   className = "object-cover",
   lightbox,
   caption,
+  items,
+  index,
 }: {
   src: string;
   poster?: string;
@@ -33,6 +36,9 @@ export default function SpotlightGif({
   className?: string;
   lightbox?: string;
   caption?: { title?: string; desc?: string };
+  /** Explicit section set — only the virtualizing spotlight carousel passes it. */
+  items?: LightboxItem[];
+  index?: number;
 }) {
   const [reduced, setReduced] = useState<boolean | null>(null); // null = pre-mount
   const [animating, setAnimating] = useState(false);
@@ -59,6 +65,8 @@ export default function SpotlightGif({
           sizes={sizes}
           className={className}
           caption={caption}
+          items={items}
+          index={index}
         />
       );
     }

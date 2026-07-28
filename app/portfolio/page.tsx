@@ -62,7 +62,15 @@ export default async function PortfolioPage() {
                 placeholder={<GalleryPlaceholder />}
                 lightbox="portfolio-gallery"
                 lightboxCaption={{ title, desc: tagline }}
-                imgClassName="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                // object-CONTAIN: the whole photo is always visible, whatever
+                // its aspect ratio — portrait and landscape shots letterbox
+                // inside the square instead of being center-cropped. The tile
+                // footprint stays identical for every item, so the grid is
+                // still perfectly even.
+                imgClassName="object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+                // `cream` is the letterbox fill: one step warmer/darker than
+                // this section's `ivory`, so the unused space around a
+                // non-square photo reads as a deliberate card, not a gap.
                 wrapperClassName="relative aspect-square w-full overflow-hidden rounded-[14px] bg-cream"
               />
               {/* Caption fields exist ONLY while "Edit site" is toggled on —

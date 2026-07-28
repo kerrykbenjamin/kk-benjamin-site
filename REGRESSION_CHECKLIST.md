@@ -25,9 +25,30 @@ enough — content can exist in the DOM but be invisible (e.g. stuck at
 - [ ] Footer: inverted logo, nav links, © line
 - [ ] No horizontal scroll at any breakpoint
 - [ ] No stuck-invisible sections (nothing left at `opacity: 0` after scroll)
-- [ ] **Lightbox is SINGLE-IMAGE**: clicking an eligible photo opens only that
-      photo — no arrows, no counter, arrow keys and swipe do nothing; closes
-      via × / backdrop / Esc; focus trapped + restored; body scroll locked
+- [ ] **Lightbox is SECTION-SCOPED** (this replaced the old single-image rule):
+      - media always shows WHOLE (`object-contain`) and fits inside the
+        viewport at 375/768/1024/1440 — never cropped, never overflowing
+      - next/prev via arrows + ArrowLeft/ArrowRight + touch swipe, with a
+        `n / total` counter, and it WRAPS at both ends
+      - navigation NEVER leaves the clicked item's section. Groups are
+        `portfolio-gallery`, `about`, `contact`, and per study
+        `case:<slug>:hero` / `:process` / `:spotlight`. Verify on a case study
+        that hero opens with **no arrows/counter** (1 item), process gives
+        `1 / 4`, and spotlight gives its own filled-slot count — a set must
+        never merge two of these
+      - **the spotlight set comes from the carousel's explicit `items`, not the
+        DOM.** The lazy window only mounts 2 slides, so a DOM-derived set would
+        wrongly read "1 / 2" for a 3+-slide spotlight. If the counter ever
+        matches the mounted-slide count instead of the filled-slot count, this
+        regressed
+      - closes via × / backdrop / Esc; focus trapped + restored; scroll locked
+- [ ] **Video in the lightbox**: a spotlight video is clickable to enlarge
+      (visitor), opens as a real `<video>` with FULL native controls
+      (play/pause, scrubber, volume/mute, fullscreen) at `object-contain`;
+      paging across a mixed photo/video set works both directions; leaving a
+      video slide or closing UNMOUNTS it, so only the item on screen can play.
+      The inline preview's own play/mute buttons must still work (they sit
+      above the click-to-enlarge surface) — verify both, they're layered
 
 ## Home `/`
 - [ ] Hero: eyebrow, H1 "I create strategies…", subhead, 2 CTAs, hero image
@@ -59,15 +80,25 @@ enough — content can exist in the DOM but be invisible (e.g. stuck at
       display centered along the bottom of the LIGHTBOX (gradient scrim, no
       empty bar when a tile has no caption; case-study images stay
       caption-free); placeholders never open the lightbox; edit-mode wins when
-      logged in; tiles editable via Add/Change photo with 1:1 auto-crop,
-      swap-only
+      logged in; tiles editable via Add/Change photo, swap-only
+- [ ] **Gallery photos are NEVER cropped**: tiles keep a uniform square
+      footprint, but the image itself is `object-contain`, so a portrait or
+      ultra-wide photo letterboxes inside the tile with `bg-cream` filling the
+      remainder (one step warmer than the section's `ivory`). Upload a 1:2 and
+      a 16:5 test image and confirm both are fully visible with their aspect
+      ratio intact. The gallery field is deliberately **not** `square` in the
+      registry — re-adding that flag would re-crop uploads permanently.
+      (Process-step photos DO stay `square`/center-cropped — that's correct.)
 - [ ] Mini CTA ("Have a campaign…" + LET'S TALK →)
 
 ## Case studies `/portfolio/[slug]`
 **All four slugs render the RICH template** (the plain 04–09 template was retired
 and `PlainCaseStudy.tsx` deleted). the-perfected-flower / natural-beauty /
-throwback-pizza use their accent palettes; dunkin-scholarly-study stays on the
-default DESIGN_TOKENS.md tokens.
+throwback-pizza use their accent palettes; dunkin-scholarly-study now has its
+own warm amber/rose CONCEPT palette (CASE_STUDY_PALETTES.md) — deliberately not
+Dunkin's trademarked colors, and it declares no literal swatch row, so the
+Visual identity section still hides. Site chrome stays on DESIGN_TOKENS.md on
+every page — verify the footer is still `#182312` on the Dunkin page.
 - [ ] All 4 render: At-a-glance sidebar card, dark campaign spotlight, and the
       sections their own notes supply — fully populated, nothing lost vs the old
       template. NB / Throwback / Perfected Flower additionally show the process
