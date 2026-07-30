@@ -10,7 +10,10 @@ import EditModeOnly from "@/components/edit/EditModeOnly";
 import ImageSlot from "@/components/edit/ImageSlot";
 import OrderedGrid, { type OrderedItem } from "@/components/edit/OrderedGrid";
 import { caseStudies } from "@/data/caseStudies";
-import { portfolioIllustrations } from "@/data/portfolioIllustrations";
+import {
+  portfolioIllustrations,
+  SHOW_ILLUSTRATIONS_GALLERY,
+} from "@/data/portfolioIllustrations";
 import { getText } from "@/lib/content";
 import { getIsEditor } from "@/lib/editor-state";
 import { getOrder, applyOrder } from "@/lib/order";
@@ -24,7 +27,11 @@ export const metadata: Metadata = {
 export default async function PortfolioPage() {
   const [caseOrder, illusOrder, editor] = await Promise.all([
     getOrder("caseStudies", caseStudies.map((c) => c.slug)),
-    getOrder("portfolioIllustrations", portfolioIllustrations.map((i) => i.id)),
+    // Skipped while the gallery is flagged off — no order lookup for a
+    // collection that isn't on the page.
+    SHOW_ILLUSTRATIONS_GALLERY
+      ? getOrder("portfolioIllustrations", portfolioIllustrations.map((i) => i.id))
+      : Promise.resolve<string[]>([]),
     getIsEditor(),
   ]);
 
@@ -40,7 +47,14 @@ export default async function PortfolioPage() {
   // editable: an EDITOR still sees the ✎ fields under each tile. Empty slots
   // show the styled GalleryPlaceholder and aren't lightbox-eligible until a
   // real photo is uploaded.
-  const orderedIllus = applyOrder(portfolioIllustrations, illusOrder, (i) => i.id);
+  //
+  // While SHOW_ILLUSTRATIONS_GALLERY is off this resolves to an empty list, so
+  // none of the below runs: no getText() for the captions, no ImageSlot (hence
+  // no edit affordances and no `portfolio-gallery` lightbox group), no fetches
+  // for the hidden fields. All the code stays put for when the flag flips back.
+  const orderedIllus = SHOW_ILLUSTRATIONS_GALLERY
+    ? applyOrder(portfolioIllustrations, illusOrder, (i) => i.id)
+    : [];
   const illusItems: OrderedItem[] = await Promise.all(
     orderedIllus.map(async (illus, i) => {
       const [title, tagline] = await Promise.all([
@@ -129,32 +143,41 @@ export default async function PortfolioPage() {
         </Container>
       </section>
 
-      {/* Illustrations and projects */}
-      <section className="bg-ivory">
-        <Container className="py-16 sm:py-24">
-          <div className="max-w-2xl">
-            <Field id="portfolio.illustrations.eyebrow" as="p" className="eyebrow text-sage" />
-            <Field
-              id="portfolio.illustrations.h2"
-              as="h2"
-              className="mt-4 font-display text-h2 font-semibold text-forest"
+      {/* Illustrations and projects — gated by SHOW_ILLUSTRATIONS_GALLERY in
+          data/portfolioIllustrations.ts. Flip that one constant to `true` to
+          restore this section exactly as it was; nothing here was deleted. */}
+      {SHOW_ILLUSTRATIONS_GALLERY && (
+        <section className="bg-ivory">
+          <Container className="py-16 sm:py-24">
+            <div className="max-w-2xl">
+              <Field id="portfolio.illustrations.eyebrow" as="p" className="eyebrow text-sage" />
+              <Field
+                id="portfolio.illustrations.h2"
+                as="h2"
+                className="mt-4 font-display text-h2 font-semibold text-forest"
+              />
+            </div>
+            {/* Uniform square-tile gallery, GALLERY_SLOT_COUNT tiles: 2 columns
+                up to lg, 4 at lg+. A 3-col md step is deliberately skipped —
+                16 divides evenly into 2 and 4 (8 full rows / a clean 4×4) but
+                not into 3, which would strand a single orphan tile on the last
+                row between 768px and 1024px. */}
+            <OrderedGrid
+              collection="portfolioIllustrations"
+              items={illusItems}
+              className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4"
             />
-          </div>
-          {/* Uniform square-tile gallery, GALLERY_SLOT_COUNT tiles: 2 columns
-              up to lg, 4 at lg+. A 3-col md step is deliberately skipped —
-              16 divides evenly into 2 and 4 (8 full rows / a clean 4×4) but
-              not into 3, which would strand a single orphan tile on the last
-              row between 768px and 1024px. */}
-          <OrderedGrid
-            collection="portfolioIllustrations"
-            items={illusItems}
-            className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4"
-          />
-        </Container>
-      </section>
+          </Container>
+        </section>
+      )}
 
-      {/* Mini CTA */}
-      <section className="bg-cream">
+      {/* Mini CTA. Normally the `cream` half of the alternation that follows the
+          `ivory` gallery band — but with the gallery flagged off it inherits
+          `ivory` itself, so the CTA still reads as its own section instead of
+          merging into the cream case-studies block above it. The vertical
+          rhythm is identical either way: the colour boundary still lands 24px
+          (Container pb-6) below the last case-study card. */}
+      <section className={SHOW_ILLUSTRATIONS_GALLERY ? "bg-cream" : "bg-ivory"}>
         <Container className="py-16 text-center sm:py-20">
           <Field
             id="portfolio.cta.h2"

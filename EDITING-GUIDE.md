@@ -91,28 +91,12 @@ photo on purpose:
   you add a photo, it shows a tidy tile with a little icon and the step's name
   in your project's colors. Visitors see that tile too, and it's designed to
   look finished, so there's no rush.
-- **The Portfolio page's gallery tiles** (the "Illustrations and Projects"
-  squares) — empty ones show a neat "Gallery photo" tile until you fill them.
-  These work exactly like the Process photos: square, auto-trimmed from the
-  middle, swap-but-not-remove. Each tile can also have a **title and a short
-  tagline** — nobody sees them on the grid (the grid is clean photos, even
-  while you're logged in); they appear **centered along the bottom of the
-  pop-up** when a visitor taps the photo to enlarge it. To change them, tap
-  **"Edit site"** — the title and tagline then show under each tile with the
-  usual pencil; tiles without a caption just show the photo, no empty box.
-
 Tap **“Add photo”** on any of these to fill it (after that it says “Change
 photo” like the rest). Things to know:
 
-- **Gallery photos are never cropped.** Upload any shape — tall, wide, or
-  square — and the *whole* picture is shown, sitting inside a neat square tile
-  with a soft cream border filling the leftover space. All the tiles stay the
-  same size, so the grid still looks tidy. (Older gallery photos you uploaded
-  before this change were trimmed to a square at the time; re-upload one if
-  you'd like to see all of it again.)
-- **Process photos are square.** Unlike the gallery, these are still trimmed to
-  a neat square from the middle of the picture — so roughly-square photos work
-  best there, and nothing ever comes out stretched or squished.
+- **Process photos are square.** They're trimmed to a neat square from the
+  middle of the picture — so roughly-square photos work best there, and nothing
+  ever comes out stretched or squished.
 - **You can swap, not remove.** Once a spot has a real photo you can replace it
   with a different one any time, but there's no way to take it back to the
   placeholder tile — so add photos when you have ones you like.
@@ -181,7 +165,7 @@ thumb; use photos and GIFs for the rest.
 5. Changed your mind? Tap **“Reset to default”** at the bottom of the panel to
    go back to the original colors, any time.
 
-## 6. Reorder your case studies, value props, or gallery photos
+## 6. Reorder your case studies or value props
 
 While editing is on, hover or tap any card in one of those groups and you'll
 see small controls in the corner:
@@ -221,11 +205,11 @@ ask your developer if you want them changed.
   shows the *whole* thing — never cropped — and you can move through the other
   items **in that same group** with the ‹ › arrows, the left/right arrow keys,
   or by swiping on a phone. A small counter (like *2 / 5*) shows where you are.
-  Groups don't mix: from a gallery photo you scroll through the gallery, from a
-  campaign slideshow item you scroll through that project's slideshow, and a
-  single photo on its own (like a project's main picture) just opens with no
-  arrows at all. Close with the ×, the Esc key, or by tapping the dimmed
-  background.
+  Groups don't mix: from a campaign slideshow item you scroll through that
+  project's slideshow, from a Process photo you scroll through that project's
+  Process row, and a single photo on its own (like a project's main picture)
+  just opens with no arrows at all. Close with the ×, the Esc key, or by tapping
+  the dimmed background.
 - **Videos open large too.** Tapping a campaign video opens it big and centered
   with the **full player controls** — play/pause, a scrubber to jump around,
   volume and mute, and fullscreen — unlike the small silent preview that loops
@@ -241,4 +225,9 @@ ask your developer if you want them changed.
 - You can change **words, photos, colors, and the order of cards** — but not
   the layout itself (column counts, spacing, which sections exist), so it's
   impossible to accidentally break how the site looks.
+- **The "Illustrations and Projects" photo grid is currently turned off.** It
+  used to sit near the bottom of the Portfolio page, under the case studies.
+  It's hidden, not deleted — nothing was thrown away, and it can be switched
+  back on any time (ask your developer; it's a one-line change). While it's off
+  there are no gallery tiles to fill in, so don't go looking for them.
 - Forgot your password or want to change it? Ask whoever set up the site.

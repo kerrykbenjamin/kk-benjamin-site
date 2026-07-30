@@ -31,7 +31,8 @@ enough — content can exist in the DOM but be invisible (e.g. stuck at
       - next/prev via arrows + ArrowLeft/ArrowRight + touch swipe, with a
         `n / total` counter, and it WRAPS at both ends
       - navigation NEVER leaves the clicked item's section. Groups are
-        `portfolio-gallery`, `about`, `contact`, and per study
+        `portfolio-gallery` (only while `SHOW_ILLUSTRATIONS_GALLERY` is on —
+        currently off, so it must not appear anywhere), `about`, `contact`, and per study
         `case:<slug>:hero` / `:process` / `:spotlight`. Verify on a case study
         that hero opens with **no arrows/counter** (1 item), process gives
         `1 / 4`, and spotlight gives its own filled-slot count — a set must
@@ -69,6 +70,18 @@ enough — content can exist in the DOM but be invisible (e.g. stuck at
 - [ ] Intro: eyebrow, H1, subhead
 - [ ] Filter tabs (ALL/BRANDING/SOCIAL/STRATEGY) styled, active state works
 - [ ] Case studies grid: **even 2×2 on ≥640px** (no orphaned 4th card), 1-col mobile
+- [ ] ⚑ **Illustrations and Projects is currently FLAGGED OFF** —
+      `SHOW_ILLUSTRATIONS_GALLERY = false` in data/portfolioIllustrations.ts.
+      While it's off, verify the section is **entirely absent from the HTML
+      source** (grep the rendered page for `Illustrations and Projects`,
+      `portfolio-gallery`, `portfolio.illus`, `aspect-square` — all must be 0),
+      that `/portfolio` has exactly **3 sections in cream → cream → ivory**
+      order and they are pixel-contiguous (no gap, no doubled padding), that the
+      Mini CTA has taken over the `ivory` band, that the only lightbox group on
+      the page is `contact`, that there are **no `⚠️ [content]` warnings** in
+      the server log, and that no gallery edit controls appear in edit mode.
+      The rest of this Illustrations block is the **flag-ON** contract — skip it
+      while the flag is off, and re-run it in full if the flag is flipped back.
 - [ ] Illustrations and Projects: **16-slot square-tile gallery** (count =
       `GALLERY_SLOT_COUNT` in data/portfolioIllustrations.ts): uniform 1:1
       tiles, 2 columns below `lg` (8 full rows) / 4×4 at `lg+`, no orphaned
@@ -89,7 +102,13 @@ enough — content can exist in the DOM but be invisible (e.g. stuck at
       ratio intact. The gallery field is deliberately **not** `square` in the
       registry — re-adding that flag would re-crop uploads permanently.
       (Process-step photos DO stay `square`/center-cropped — that's correct.)
-- [ ] Mini CTA ("Have a campaign…" + LET'S TALK →)
+      *(Flag-ON contract — not testable while SHOW_ILLUSTRATIONS_GALLERY is off.)*
+- [ ] Mini CTA ("Have a campaign…" + LET'S TALK →). Its background is
+      **flag-derived**: `bg-cream` when the gallery is on (alternating after the
+      gallery's `ivory` band), `bg-ivory` when the gallery is off, so the CTA
+      never merges into the cream case-studies block above it. Either way the
+      colour boundary lands 24px (Container `pb-6`) below the last case-study
+      card and the heading 64px (375px) / 80px (≥640px) below that.
 
 ## Case studies `/portfolio/[slug]`
 **All four slugs render the RICH template** (the plain 04–09 template was retired
